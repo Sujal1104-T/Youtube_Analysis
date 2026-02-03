@@ -292,7 +292,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildHistoryContent(Color bodyTextColor, Color cardColor) {

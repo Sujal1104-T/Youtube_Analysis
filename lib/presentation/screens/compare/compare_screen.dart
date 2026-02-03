@@ -150,7 +150,7 @@ class _CompareScreenState extends State<CompareScreen> {
                     ),
                   ],
                 ),
-              child: Row(
+                child: Row(
                 children: [
                   Expanded(
                     child: _buildNavItem(
@@ -281,7 +281,7 @@ class _CompareScreenState extends State<CompareScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildNoVideosToCompare(Color bodyTextColor, Color cardColor) {
