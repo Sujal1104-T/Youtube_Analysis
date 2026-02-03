@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../analytics/analytics_screen.dart';
 import '../compare/compare_screen.dart';
 import '../history/history_screen.dart';
@@ -6,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../results/results_screen.dart';
 import 'dart:io' show Platform;
-import '../../../main.dart'; // <--- ADDED: Import MyApp to access toggleTheme
+import '../../../main.dart';
 
 class InsightTubeticsScreen extends StatefulWidget {
   const InsightTubeticsScreen({Key? key}) : super(key: key);
@@ -15,15 +16,31 @@ class InsightTubeticsScreen extends StatefulWidget {
   _InsightTubeticsScreenState createState() => _InsightTubeticsScreenState();
 }
 
-class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
+class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with SingleTickerProviderStateMixin {
   bool isKeywordsSelected = true;
   TextEditingController searchController = TextEditingController();
-  final String _backendUrl = Platform.isAndroid ? 'http://192.168.0.103:3001/api' : 'http://localhost:3001/api';
+  final String _backendUrl = 'https://youtubeanalytics-1.onrender.com/api';
   bool _isLoading = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
     searchController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -33,7 +50,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter keywords or a URL to search.'),
-          backgroundColor: Color(0xFFE53935),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -57,10 +74,9 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Search successful! Displaying results.'),
-              backgroundColor: Color(0xFF4CAF50),
+              backgroundColor: Color(0xFF00FFB9),
             ),
           );
-          // Navigate to the Results screen and pass the list of videos
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -70,13 +86,12 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
-                        (route) => false,
+                    (route) => false,
                   );
                 },
               ),
             ),
           );
-
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -110,361 +125,480 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Uses the Theme's current brightness to determine the mode
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    // Uses Theme data colors from main.dart
-    final scaffoldColor = Theme.of(context).scaffoldBackgroundColor;
-    final cardColor = Theme.of(context).cardColor;
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final secondaryColor = theme.colorScheme.secondary;
 
-    return Scaffold(
-      // Use dynamic colors
-      backgroundColor: scaffoldColor,
-      appBar: AppBar(
-        // Use dynamic colors
-        backgroundColor: scaffoldColor,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Color(0xFFE53935),
-                borderRadius: BorderRadius.circular(6),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: isDarkMode
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0A0E27),
+                  Color(0xFF151B3B),
+                  Color(0xFF0A0E27),
+                ],
+              )
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFF8FAFC),
+                  Color(0xFFE0F2FE),
+                  Color(0xFFF8FAFC),
+                ],
               ),
-              child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
-            ),
-            SizedBox(width: 12),
-            Text(
-              'InsightTube',
-              style: TextStyle(
-                color: Color(0xFFE53935),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [primaryColor, Color(0xFF00FFB9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
+              ),
+              SizedBox(width: 12),
+              ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [primaryColor, Color(0xFF00FFB9)],
+                ).createShader(bounds),
+                child: Text(
+                  'InsightTube',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Container(
+              margin: EdgeInsets.only(right: 16),
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
+                  width: 1,
+                ),
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  MyApp.of(context).toggleTheme();
+                },
+                child: Icon(
+                  isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+                  color: isDarkMode ? Color(0xFFFFA726) : Color(0xFF0099CC),
+                  size: 20,
+                ),
               ),
             ),
           ],
         ),
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: 16),
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              // Use dynamic colors
-              color: cardColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: GestureDetector(
-              onTap: () {
-                // FIXED: Call the toggleTheme method from MyAppState
-                MyApp.of(context).toggleTheme();
-              },
-              child: Icon(
-                isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-                color: Colors.orange,
-                size: 20,
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Navigation Grid
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  // Use dynamic colors
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildNavItem(Icons.search, 'Search', 'search', true, isDarkMode),
-                    ),
-                    Expanded(
-                      child: _buildNavItem(Icons.bar_chart, 'Analytics', 'analytics', false, isDarkMode),
-                    ),
-                    Expanded(
-                      child: _buildNavItem(Icons.compare_arrows, 'Compare', 'compare', false, isDarkMode),
-                    ),
-                    Expanded(
-                      child: _buildNavItem(Icons.history, 'History', 'history', false, isDarkMode),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 24),
-
-              // Search Videos Section
-              Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  // Use dynamic colors
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFE53935),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(Icons.search, color: Colors.white, size: 16),
-                        ),
-                        SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Search Videos',
-                              style: TextStyle(
-                                color: Color(0xFFE53935),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              'Find and analyze YouTube content',
-                              style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 20),
-
-                    // Keywords/URL Toggle
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => isKeywordsSelected = true),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                // Use dynamic colors
-                                color: isKeywordsSelected ? (isDarkMode ? Color(0xFF3A4052) : Colors.grey[300]) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: isKeywordsSelected ? Color(0xFF4CAF50) : Colors.grey[600],
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Keywords',
-                                    style: TextStyle(
-                                      color: isKeywordsSelected ? (isDarkMode ? Colors.white : Colors.black87) : Colors.grey[400],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => isKeywordsSelected = false),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                // Use dynamic colors
-                                color: !isKeywordsSelected ? (isDarkMode ? Color(0xFF3A4052) : Colors.grey[300]) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.link,
-                                    color: !isKeywordsSelected ? (isDarkMode ? Colors.white : Colors.black87) : Colors.grey[600],
-                                    size: 16,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'URL',
-                                    style: TextStyle(
-                                      color: !isKeywordsSelected ? (isDarkMode ? Colors.white : Colors.black87) : Colors.grey[400],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // Search Input
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        // Use dynamic colors
-                        color: scaffoldColor,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade700),
-                      ),
-                      child: TextField(
-                        controller: searchController,
-                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
-                        decoration: InputDecoration(
-                          hintText: isKeywordsSelected
-                              ? 'Enter keywords to search videos...'
-                              : 'Enter YouTube URL to analyze...',
-                          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
-                          border: InputBorder.none,
-                          suffixIcon: Icon(Icons.mic, color: Colors.grey[500], size: 20),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // Search Button
-                    Container(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _performSearch,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFE53935),
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                            : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.search, color: Colors.white, size: 18),
-                            SizedBox(width: 8),
-                            Text(
-                              'Search',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 32),
-
-              // Ready to Analyze Section
-              Column(
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Navigation Grid with Glassmorphism
                   Container(
-                    width: 80,
-                    height: 80,
+                    padding: EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Color(0xFFE53935),
-                      shape: BoxShape.circle,
+                      color: isDarkMode
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.white.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDarkMode
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.white.withOpacity(0.5),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    child: Icon(Icons.play_arrow, color: Colors.white, size: 40),
-                  ),
-
-                  SizedBox(height: 16),
-
-                  Text(
-                    'Ready to Analyze Videos',
-                    style: TextStyle(
-                      color: Color(0xFFE53935),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-
-                  SizedBox(height: 8),
-
-                  Text(
-                    'Search for videos by keywords or paste\na YouTube URL to get started with AI-\npowered analytics',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                      height: 1.5,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildNavItem(Icons.search, 'Search', 'search', true, isDarkMode, primaryColor),
+                        ),
+                        Expanded(
+                          child: _buildNavItem(Icons.bar_chart, 'Analytics', 'analytics', false, isDarkMode, primaryColor),
+                        ),
+                        Expanded(
+                          child: _buildNavItem(Icons.compare_arrows, 'Compare', 'compare', false, isDarkMode, primaryColor),
+                        ),
+                        Expanded(
+                          child: _buildNavItem(Icons.history, 'History', 'history', false, isDarkMode, primaryColor),
+                        ),
+                      ],
                     ),
                   ),
 
                   SizedBox(height: 24),
 
-                  // Feature Tags
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
+                  // Search Videos Section with Glassmorphism
+                  Container(
+                    padding: EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.white.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDarkMode
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.white.withOpacity(0.5),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.15),
+                          blurRadius: 24,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [primaryColor, Color(0xFF00FFB9)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primaryColor.withOpacity(0.4),
+                                    blurRadius: 12,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(Icons.search, color: Colors.white, size: 18),
+                            ),
+                            SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ShaderMask(
+                                  shaderCallback: (bounds) => LinearGradient(
+                                    colors: [primaryColor, Color(0xFF00FFB9)],
+                                  ).createShader(bounds),
+                                  child: Text(
+                                    'Search Videos',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Find and analyze YouTube content',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 20),
+
+                        // Keywords/URL Toggle
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => isKeywordsSelected = true),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: isKeywordsSelected
+                                        ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: isKeywordsSelected
+                                        ? Border.all(color: primaryColor.withOpacity(0.5), width: 1.5)
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: isKeywordsSelected ? Color(0xFF00FFB9) : Colors.grey[600],
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Keywords',
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          color: isKeywordsSelected ? primaryColor : theme.textTheme.bodyMedium?.color,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => isKeywordsSelected = false),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: !isKeywordsSelected
+                                        ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: !isKeywordsSelected
+                                        ? Border.all(color: primaryColor.withOpacity(0.5), width: 1.5)
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.link,
+                                        color: !isKeywordsSelected ? primaryColor : Colors.grey[600],
+                                        size: 16,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'URL',
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          color: !isKeywordsSelected ? primaryColor : theme.textTheme.bodyMedium?.color,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 16),
+
+                        // Search Input with Glow Effect
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDarkMode
+                                ? Color(0xFF1A1F3A).withOpacity(0.5)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDarkMode
+                                  ? primaryColor.withOpacity(0.3)
+                                  : Color(0xFF0099CC).withOpacity(0.3),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: primaryColor.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: searchController,
+                            style: theme.textTheme.bodyLarge,
+                            decoration: InputDecoration(
+                              hintText: isKeywordsSelected
+                                  ? 'Enter keywords to search videos...'
+                                  : 'Enter YouTube URL to analyze...',
+                              hintStyle: theme.textTheme.bodyMedium,
+                              border: InputBorder.none,
+                              suffixIcon: Icon(
+                                Icons.mic,
+                                color: primaryColor.withOpacity(0.6),
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 16),
+
+                        // Search Button with Gradient
+                        Container(
+                          width: double.infinity,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [primaryColor, Color(0xFF00FFB9)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: primaryColor.withOpacity(0.4),
+                                blurRadius: 16,
+                                offset: Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _performSearch,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.search, color: Colors.white, size: 20),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Search',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 32),
+
+                  // Ready to Analyze Section
+                  Column(
                     children: [
-                      _buildFeatureTag('Smart Search', Color(0xFF4CAF50)),
-                      _buildFeatureTag('AI Sentiment', Color(0xFFE91E63)),
-                      _buildFeatureTag('Deep Analytics', Color(0xFF2196F3)),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [primaryColor, Color(0xFF00FFB9)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: primaryColor.withOpacity(0.4),
+                              blurRadius: 24,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Icon(Icons.play_arrow, color: Colors.white, size: 48),
+                      ),
+
+                      SizedBox(height: 20),
+
+                      ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: [primaryColor, Color(0xFF00FFB9)],
+                        ).createShader(bounds),
+                        child: Text(
+                          'Ready to Analyze Videos',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 8),
+
+                      Text(
+                        'Search for videos by keywords or paste\na YouTube URL to get started with AI-\npowered analytics',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          height: 1.6,
+                        ),
+                      ),
+
+                      SizedBox(height: 24),
+
+                      // Feature Tags with Gradient Borders
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          _buildFeatureTag('Smart Search', primaryColor, isDarkMode),
+                          _buildFeatureTag('AI Sentiment', secondaryColor, isDarkMode),
+                          _buildFeatureTag('Deep Analytics', Color(0xFF00FFB9), isDarkMode),
+                        ],
+                      ),
                     ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, String route, bool isActive, bool isDarkMode) {
-    Color activeColor = Color(0xFF6366F1);
-
-    if (label == 'History') {
-      activeColor = Color(0xFFFF9800);
-    }
-    if (label == 'Search') {
-      activeColor = Color(0xFFE53935);
-    }
-    if (label == 'Analytics') {
-      activeColor = Color(0xFF6366F1);
-    }
-    if (label == 'Compare') {
-      activeColor = Color(0xFF6366F1);
-    }
-
+  Widget _buildNavItem(IconData icon, String label, String route, bool isActive, bool isDarkMode, Color primaryColor) {
     return GestureDetector(
       onTap: () {
         _handleNavigation(route);
@@ -474,14 +608,26 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
           Container(
             padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              // Use dynamic colors
-              color: isDarkMode ? Color(0xFF1A1D29) : Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: isActive ? Border.all(color: activeColor, width: 2) : null,
+              color: isActive
+                  ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: isActive
+                  ? Border.all(color: primaryColor, width: 2)
+                  : null,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: Icon(
               icon,
-              color: isActive ? activeColor : Colors.grey[400],
+              color: isActive ? primaryColor : Colors.grey[400],
               size: 20,
             ),
           ),
@@ -489,7 +635,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
           Text(
             label,
             style: TextStyle(
-              color: isActive ? activeColor : Colors.grey[400],
+              color: isActive ? primaryColor : Colors.grey[400],
               fontSize: 12,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             ),
@@ -512,7 +658,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
-                      (route) => false,
+                  (route) => false,
                 );
               },
             ),
@@ -528,7 +674,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
-                      (route) => false,
+                  (route) => false,
                 );
               },
             ),
@@ -544,7 +690,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
-                      (route) => false,
+                  (route) => false,
                 );
               },
             ),
@@ -554,13 +700,23 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
     }
   }
 
-  Widget _buildFeatureTag(String text, Color color) {
+  Widget _buildFeatureTag(String text, Color color, bool isDarkMode) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withOpacity(0.4),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.2),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -571,15 +727,23 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> {
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.6),
+                  blurRadius: 4,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
           ),
-          SizedBox(width: 6),
+          SizedBox(width: 8),
           Text(
             text,
             style: TextStyle(
               color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
             ),
           ),
         ],

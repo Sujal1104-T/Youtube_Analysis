@@ -16,7 +16,7 @@ class CompareScreen extends StatefulWidget {
 }
 
 class _CompareScreenState extends State<CompareScreen> {
-  final String _backendUrl = 'http://192.168.0.103:3001/api';
+  final String _backendUrl = 'https://my-youtube-api.cloudfunctions.net/api';
   List<Map<String, dynamic>> _videosToCompare = [];
   bool _isLoading = false;
   String? _errorMessage;

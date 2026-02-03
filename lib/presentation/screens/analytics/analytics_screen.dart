@@ -16,7 +16,7 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  final String _backendUrl = 'http://192.168.0.103:3001/api';
+  final String _backendUrl = 'https://my-youtube-api.cloudfunctions.net/api';
   Map<String, dynamic>? _analyticsData;
   bool _isLoading = true;
   String _error = '';
