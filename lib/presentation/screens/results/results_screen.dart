@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../analytics/analytics_screen.dart';
 
 class ResultsScreen extends StatefulWidget {
@@ -23,7 +22,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     _animationController.forward();
@@ -44,7 +43,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
     return Container(
       decoration: BoxDecoration(
         gradient: isDarkMode
-            ? LinearGradient(
+            ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -53,7 +52,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                   Color(0xFF0A0E27),
                 ],
               )
-            : LinearGradient(
+            : const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -70,7 +69,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
           elevation: 0,
           leading: IconButton(
             icon: Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isDarkMode
                     ? Colors.white.withOpacity(0.1)
@@ -98,7 +97,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
           ),
           title: ShaderMask(
             shaderCallback: (bounds) => LinearGradient(
-              colors: [primaryColor, Color(0xFF00FFB9)],
+              colors: [primaryColor, const Color(0xFF00FFB9)],
             ).createShader(bounds),
             child: Text(
               'Search Results',
@@ -118,17 +117,17 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                       height: 80,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [primaryColor, Color(0xFF00FFB9)],
+                          colors: [primaryColor, const Color(0xFF00FFB9)],
                         ),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.search_off,
                         color: Colors.white,
                         size: 40,
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       'No videos found for this search.',
                       style: theme.textTheme.bodyMedium,
@@ -137,7 +136,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                 ),
               )
             : ListView.builder(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 itemCount: widget.videos.length,
                 itemBuilder: (context, index) {
                   final video = widget.videos[index];
@@ -175,8 +174,8 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                         );
                       },
                       child: Container(
-                        margin: EdgeInsets.only(bottom: 16),
-                        padding: EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: isDarkMode
                               ? Colors.white.withOpacity(0.05)
@@ -192,7 +191,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                             BoxShadow(
                               color: primaryColor.withOpacity(0.1),
                               blurRadius: 12,
-                              offset: Offset(0, 4),
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
@@ -208,7 +207,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                                   gradient: LinearGradient(
                                     colors: [
                                       primaryColor.withOpacity(0.3),
-                                      Color(0xFF00FFB9).withOpacity(0.3),
+                                      const Color(0xFF00FFB9).withOpacity(0.3),
                                     ],
                                   ),
                                 ),
@@ -229,7 +228,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                                 ),
                               ),
                             ),
-                            SizedBox(width: 12),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,7 +241,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: 6),
+                                  const SizedBox(height: 6),
                                   Row(
                                     children: [
                                       Container(
@@ -253,7 +252,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                                           shape: BoxShape.circle,
                                         ),
                                       ),
-                                      SizedBox(width: 6),
+                                      const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
                                           channelTitle,
@@ -266,14 +265,14 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 8),
+                                  const SizedBox(height: 8),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
                                           primaryColor.withOpacity(0.2),
-                                          Color(0xFF00FFB9).withOpacity(0.2),
+                                          const Color(0xFF00FFB9).withOpacity(0.2),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(12),
@@ -289,7 +288,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                                           size: 12,
                                           color: primaryColor,
                                         ),
-                                        SizedBox(width: 4),
+                                        const SizedBox(width: 4),
                                         Text(
                                           'Tap to analyze',
                                           style: TextStyle(

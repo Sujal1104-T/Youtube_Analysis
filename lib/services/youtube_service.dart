@@ -8,6 +8,15 @@ class YouTubeService {
   /// Search for videos by query
   Future<List<Map<String, dynamic>>> searchVideos(String query) async {
     try {
+      // Check if query is a URL
+      String? videoId = extractVideoId(query);
+      
+      if (videoId != null) {
+        // If it's a URL, fetch details specifically for that video
+        final videoDetails = await getVideoDetails(videoId);
+        return [videoDetails];
+      }
+
       final url = Uri.parse(
           '${AppConstants.youtubeBaseUrl}/search?part=snippet&q=$query&type=video&maxResults=10&key=${AppConstants.youtubeApiKey}');
       
@@ -34,6 +43,23 @@ class YouTubeService {
     } catch (e) {
       throw Exception('Network error: $e');
     }
+  }
+
+  /// Extract Video ID from various YouTube URL formats
+  String? extractVideoId(String url) {
+    if (!url.contains('http') && !url.contains('youtu')) return null;
+    
+    RegExp regExp = RegExp(
+      r'^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*',
+      caseSensitive: false,
+      multiLine: false,
+    );
+    
+    final match = regExp.firstMatch(url);
+    if (match != null && match.group(7) != null) {
+      return match.group(7);
+    }
+    return null;
   }
 
   /// Get detailed statistics for a specific video

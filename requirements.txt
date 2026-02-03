@@ -1,4 +1,0 @@
-Flask
-Flask-CORS
-requests
-# psycopg2-binary # <-- Uncomment this if you implement PostgreSQL for historys

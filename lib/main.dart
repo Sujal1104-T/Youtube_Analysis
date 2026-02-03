@@ -5,7 +5,7 @@ import 'presentation/screens/home/home_screen.dart';
 // Removed: import 'dart:async';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -49,7 +49,7 @@ class MyAppState extends State<MyApp> {
       title: 'InsightTube',
       theme: _isDarkMode ? _darkTheme : _lightTheme,
       // Removed: Passing initialUrl
-      home: InsightTubeticsScreen(),
+      home: const InsightTubeticsScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -57,44 +57,42 @@ class MyAppState extends State<MyApp> {
   // Dark Theme - Cyan-Teal Aesthetic
   ThemeData get _darkTheme => ThemeData(
     brightness: Brightness.dark,
-    primaryColor: Color(0xFF00D9FF),
+    primaryColor: const Color(0xFF00D9FF),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     useMaterial3: true,
-    scaffoldBackgroundColor: Color(0xFF0A0E27),
-    cardColor: Color(0xFF1A1F3A).withOpacity(0.6),
-    appBarTheme: AppBarTheme(
+    scaffoldBackgroundColor: const Color(0xFF0A0E27),
+    cardColor: const Color(0xFF1A1F3A).withOpacity(0.6),
+    appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF0A0E27),
       elevation: 0,
     ),
     textTheme: GoogleFonts.dmSansTextTheme(
       TextTheme(
-        displayLarge: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w700),
-        displayMedium: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600),
-        displaySmall: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
+        displayLarge: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w700),
+        displayMedium: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600),
+        displaySmall: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
         headlineLarge: GoogleFonts.outfit(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
         headlineMedium: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600),
         headlineSmall: GoogleFonts.outfit(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
         titleLarge: GoogleFonts.outfit(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-        titleMedium: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
-        titleSmall: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
-        bodyLarge: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w400),
-        bodyMedium: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w400),
-        bodySmall: TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w400),
-        labelLarge: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-        labelMedium: GoogleFonts.jetBrainsMono(color: Color(0xFF00FFB9), fontSize: 12, fontWeight: FontWeight.w500),
-        labelSmall: TextStyle(color: Colors.white60, fontSize: 10, fontWeight: FontWeight.w400),
+        titleMedium: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+        titleSmall: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+        bodyLarge: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w400),
+        bodyMedium: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w400),
+        bodySmall: const TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w400),
+        labelLarge: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+        labelMedium: GoogleFonts.jetBrainsMono(color: const Color(0xFF00FFB9), fontSize: 12, fontWeight: FontWeight.w500),
+        labelSmall: const TextStyle(color: Colors.white60, fontSize: 10, fontWeight: FontWeight.w400),
       ),
     ),
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: Color(0xFF00D9FF),
       secondary: Color(0xFFFF6B9D),
       surface: Color(0xFF1A1F3A),
-      background: Color(0xFF0A0E27),
       error: Color(0xFFFF5252),
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: Colors.white,
-      onBackground: Colors.white,
       onError: Colors.white,
     ),
   );
@@ -102,44 +100,42 @@ class MyAppState extends State<MyApp> {
   // Light Theme - Complementary Palette
   ThemeData get _lightTheme => ThemeData(
     brightness: Brightness.light,
-    primaryColor: Color(0xFF0099CC),
+    primaryColor: const Color(0xFF0099CC),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     useMaterial3: true,
-    scaffoldBackgroundColor: Color(0xFFF8FAFC),
+    scaffoldBackgroundColor: const Color(0xFFF8FAFC),
     cardColor: Colors.white,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFFF8FAFC),
       elevation: 0,
     ),
     textTheme: GoogleFonts.dmSansTextTheme(
       TextTheme(
-        displayLarge: TextStyle(color: Color(0xFF0A0E27), fontSize: 32, fontWeight: FontWeight.w700),
-        displayMedium: TextStyle(color: Color(0xFF0A0E27), fontSize: 28, fontWeight: FontWeight.w600),
-        displaySmall: TextStyle(color: Color(0xFF0A0E27), fontSize: 24, fontWeight: FontWeight.w600),
-        headlineLarge: GoogleFonts.outfit(color: Color(0xFF0A0E27), fontSize: 22, fontWeight: FontWeight.w700),
-        headlineMedium: GoogleFonts.outfit(color: Color(0xFF0A0E27), fontSize: 20, fontWeight: FontWeight.w600),
-        headlineSmall: GoogleFonts.outfit(color: Color(0xFF0A0E27), fontSize: 18, fontWeight: FontWeight.w600),
-        titleLarge: GoogleFonts.outfit(color: Color(0xFF0A0E27), fontSize: 16, fontWeight: FontWeight.w600),
-        titleMedium: TextStyle(color: Color(0xFF0A0E27), fontSize: 14, fontWeight: FontWeight.w500),
-        titleSmall: TextStyle(color: Color(0xFF475569), fontSize: 12, fontWeight: FontWeight.w500),
-        bodyLarge: TextStyle(color: Color(0xFF0A0E27), fontSize: 16, fontWeight: FontWeight.w400),
-        bodyMedium: TextStyle(color: Color(0xFF475569), fontSize: 14, fontWeight: FontWeight.w400),
-        bodySmall: TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.w400),
-        labelLarge: TextStyle(color: Color(0xFF0A0E27), fontSize: 14, fontWeight: FontWeight.w600),
-        labelMedium: GoogleFonts.jetBrainsMono(color: Color(0xFF0099CC), fontSize: 12, fontWeight: FontWeight.w500),
-        labelSmall: TextStyle(color: Color(0xFF64748B), fontSize: 10, fontWeight: FontWeight.w400),
+        displayLarge: const TextStyle(color: Color(0xFF0A0E27), fontSize: 32, fontWeight: FontWeight.w700),
+        displayMedium: const TextStyle(color: Color(0xFF0A0E27), fontSize: 28, fontWeight: FontWeight.w600),
+        displaySmall: const TextStyle(color: Color(0xFF0A0E27), fontSize: 24, fontWeight: FontWeight.w600),
+        headlineLarge: GoogleFonts.outfit(color: const Color(0xFF0A0E27), fontSize: 22, fontWeight: FontWeight.w700),
+        headlineMedium: GoogleFonts.outfit(color: const Color(0xFF0A0E27), fontSize: 20, fontWeight: FontWeight.w600),
+        headlineSmall: GoogleFonts.outfit(color: const Color(0xFF0A0E27), fontSize: 18, fontWeight: FontWeight.w600),
+        titleLarge: GoogleFonts.outfit(color: const Color(0xFF0A0E27), fontSize: 16, fontWeight: FontWeight.w600),
+        titleMedium: const TextStyle(color: Color(0xFF0A0E27), fontSize: 14, fontWeight: FontWeight.w500),
+        titleSmall: const TextStyle(color: Color(0xFF475569), fontSize: 12, fontWeight: FontWeight.w500),
+        bodyLarge: const TextStyle(color: Color(0xFF0A0E27), fontSize: 16, fontWeight: FontWeight.w400),
+        bodyMedium: const TextStyle(color: Color(0xFF475569), fontSize: 14, fontWeight: FontWeight.w400),
+        bodySmall: const TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.w400),
+        labelLarge: const TextStyle(color: Color(0xFF0A0E27), fontSize: 14, fontWeight: FontWeight.w600),
+        labelMedium: GoogleFonts.jetBrainsMono(color: const Color(0xFF0099CC), fontSize: 12, fontWeight: FontWeight.w500),
+        labelSmall: const TextStyle(color: Color(0xFF64748B), fontSize: 10, fontWeight: FontWeight.w400),
       ),
     ),
-    colorScheme: ColorScheme.light(
+    colorScheme: const ColorScheme.light(
       primary: Color(0xFF0099CC),
       secondary: Color(0xFFFF6B9D),
       surface: Colors.white,
-      background: Color(0xFFF8FAFC),
       error: Color(0xFFDC2626),
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: Color(0xFF0A0E27),
-      onBackground: Color(0xFF0A0E27),
       onError: Colors.white,
     ),
   );

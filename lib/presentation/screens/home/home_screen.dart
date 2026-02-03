@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../analytics/analytics_screen.dart';
 import '../compare/compare_screen.dart';
-import '../history/history_screen.dart';
-import '../../services/youtube_service.dart';
-import '../../services/sentiment_service.dart';
+import '../history/history_screen.dart'; // Ensure this is imported for navigation logic
+import 'package:insight_tube/services/youtube_service.dart';
+import 'package:insight_tube/services/sentiment_service.dart';
 import '../results/results_screen.dart';
-import 'dart:io' show Platform;
 import '../../../main.dart';
 
 class InsightTubeticsScreen extends StatefulWidget {
@@ -23,6 +21,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
   final SentimentService _sentimentService = SentimentService(); // In case we need it here later
   
   bool _isLoading = false;
+  bool isKeywordsSelected = true;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -30,7 +29,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
   void initState() {
     super.initState();
     _fadeController = AnimationController(
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -50,7 +49,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
     if (searchController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please enter keywords or a URL to search.'),
+          content: const Text('Please enter keywords or a URL to search.'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -62,22 +61,45 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
     });
 
     try {
-      // Serverless logic: always just search using YouTube Data API
-      // If it's a URL, we might want to extract ID and get details directly, 
-      // but for "Search" screen, searching by keyword/url query is fine.
+      // Serverless logic: search using YouTube Data API
+      // YouTubeService now handles direct URLs automatically
       
       final results = await _youtubeService.searchVideos(searchController.text);
       
-      // Navigate to results screen with raw data
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResultsScreen(
-            results: results, 
-            searchQuery: searchController.text
+      if (results.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('No videos found. Try different keywords.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
-        ),
-      );
+        );
+        return;
+      }
+
+      // Smart Navigation: 
+      // If we get exactly one result, it's likely a direct URL match -> Go straight to Analytics
+      if (results.length == 1) {
+         Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnalyticsScreen(
+              videoId: results[0]['id'],
+              onBackToSearch: () => Navigator.of(context).pop(),
+            ),
+          ),
+        );
+      } else {
+        // Multiple results -> Show Results List
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultsScreen(
+              videos: results,
+              onBackToSearch: () => Navigator.of(context).pop(),
+            ),
+          ),
+        );
+      }
       
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -105,7 +127,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
     return Container(
       decoration: BoxDecoration(
         gradient: isDarkMode
-            ? LinearGradient(
+            ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -114,7 +136,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                   Color(0xFF0A0E27),
                 ],
               )
-            : LinearGradient(
+            : const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -137,7 +159,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                 height: 36,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [primaryColor, Color(0xFF00FFB9)],
+                    colors: [primaryColor, const Color(0xFF00FFB9)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -146,53 +168,43 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                     BoxShadow(
                       color: primaryColor.withOpacity(0.3),
                       blurRadius: 8,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
               ),
-              SizedBox(width: 12),
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [primaryColor, Color(0xFF00FFB9)],
-                ).createShader(bounds),
-                child: Text(
-                  'InsightTube',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'InsightTube',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                      color: isDarkMode ? Colors.white : const Color(0xFF0A0E27),
+                    ),
                   ),
-                ),
+                  Text(
+                    'YouTube Analytics',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
           actions: [
-            Container(
-              margin: EdgeInsets.only(right: 16),
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isDarkMode
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.black.withOpacity(0.1),
-                  width: 1,
-                ),
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  MyApp.of(context).toggleTheme();
-                },
-                child: Icon(
-                  isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-                  color: isDarkMode ? Color(0xFFFFA726) : Color(0xFF0099CC),
-                  size: 20,
-                ),
-              ),
+            IconButton(
+              icon: Icon(isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+              onPressed: () {
+                final appState = MyApp.of(context);
+                appState.toggleTheme();
+              },
             ),
+            const SizedBox(width: 8),
           ],
         ),
         body: FadeTransition(
@@ -200,15 +212,15 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
           child: SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 1000),
+                constraints: const BoxConstraints(maxWidth: 1000),
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Navigation Grid with Glassmorphism
                   Container(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: isDarkMode
                           ? Colors.white.withOpacity(0.05)
@@ -224,7 +236,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                         BoxShadow(
                           color: primaryColor.withOpacity(0.1),
                           blurRadius: 20,
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -246,11 +258,11 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                     ),
                   ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Search Videos Section with Glassmorphism
                   Container(
-                    padding: EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: isDarkMode
                           ? Colors.white.withOpacity(0.05)
@@ -266,7 +278,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                         BoxShadow(
                           color: primaryColor.withOpacity(0.15),
                           blurRadius: 24,
-                          offset: Offset(0, 8),
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
@@ -276,10 +288,10 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                         Row(
                           children: [
                             Container(
-                              padding: EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [primaryColor, Color(0xFF00FFB9)],
+                                  colors: [primaryColor, const Color(0xFF00FFB9)],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
@@ -288,19 +300,19 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                                   BoxShadow(
                                     color: primaryColor.withOpacity(0.4),
                                     blurRadius: 12,
-                                    offset: Offset(0, 4),
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: Icon(Icons.search, color: Colors.white, size: 18),
+                              child: const Icon(Icons.search, color: Colors.white, size: 18),
                             ),
-                            SizedBox(width: 16),
+                            const SizedBox(width: 16),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 ShaderMask(
                                   shaderCallback: (bounds) => LinearGradient(
-                                    colors: [primaryColor, Color(0xFF00FFB9)],
+                                    colors: [primaryColor, const Color(0xFF00FFB9)],
                                   ).createShader(bounds),
                                   child: Text(
                                     'Search Videos',
@@ -309,7 +321,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
                                   'Find and analyze YouTube content',
                                   style: theme.textTheme.bodySmall,
@@ -319,7 +331,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                           ],
                         ),
 
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
                         // Keywords/URL Toggle
                         Row(
@@ -328,7 +340,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                               child: GestureDetector(
                                 onTap: () => setState(() => isKeywordsSelected = true),
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                                   decoration: BoxDecoration(
                                     color: isKeywordsSelected
                                         ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
@@ -344,11 +356,11 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                                         width: 8,
                                         height: 8,
                                         decoration: BoxDecoration(
-                                          color: isKeywordsSelected ? Color(0xFF00FFB9) : Colors.grey[600],
+                                          color: isKeywordsSelected ? const Color(0xFF00FFB9) : Colors.grey[600],
                                           shape: BoxShape.circle,
                                         ),
                                       ),
-                                      SizedBox(width: 8),
+                                      const SizedBox(width: 8),
                                       Text(
                                         'Keywords',
                                         style: theme.textTheme.titleMedium?.copyWith(
@@ -360,12 +372,12 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                                 ),
                               ),
                             ),
-                            SizedBox(width: 16),
+                            const SizedBox(width: 16),
                             Expanded(
                               child: GestureDetector(
                                 onTap: () => setState(() => isKeywordsSelected = false),
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                                   decoration: BoxDecoration(
                                     color: !isKeywordsSelected
                                         ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
@@ -382,7 +394,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                                         color: !isKeywordsSelected ? primaryColor : Colors.grey[600],
                                         size: 16,
                                       ),
-                                      SizedBox(width: 8),
+                                      const SizedBox(width: 8),
                                       Text(
                                         'URL',
                                         style: theme.textTheme.titleMedium?.copyWith(
@@ -397,27 +409,27 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                           ],
                         ),
 
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Search Input with Glow Effect
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                           decoration: BoxDecoration(
                             color: isDarkMode
-                                ? Color(0xFF1A1F3A).withOpacity(0.5)
+                                ? const Color(0xFF1A1F3A).withOpacity(0.5)
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isDarkMode
                                   ? primaryColor.withOpacity(0.3)
-                                  : Color(0xFF0099CC).withOpacity(0.3),
+                                  : const Color(0xFF0099CC).withOpacity(0.3),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: primaryColor.withOpacity(0.1),
                                 blurRadius: 8,
-                                offset: Offset(0, 2),
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
@@ -439,7 +451,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                           ),
                         ),
 
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Search Button with Gradient
                         Container(
@@ -447,7 +459,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                           height: 56,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [primaryColor, Color(0xFF00FFB9)],
+                              colors: [primaryColor, const Color(0xFF00FFB9)],
                               begin: Alignment.centerLeft,
                               end: Alignment.centerRight,
                             ),
@@ -456,7 +468,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                               BoxShadow(
                                 color: primaryColor.withOpacity(0.4),
                                 blurRadius: 16,
-                                offset: Offset(0, 6),
+                                offset: const Offset(0, 6),
                               ),
                             ],
                           ),
@@ -470,7 +482,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                               ),
                             ),
                             child: _isLoading
-                                ? SizedBox(
+                                ? const SizedBox(
                                     width: 24,
                                     height: 24,
                                     child: CircularProgressIndicator(
@@ -478,7 +490,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                                       color: Colors.white,
                                     ),
                                   )
-                                : Row(
+                                : const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(Icons.search, color: Colors.white, size: 20),
@@ -500,7 +512,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                     ),
                   ),
 
-                  SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
                   // Ready to Analyze Section
                   Column(
@@ -510,7 +522,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                         height: 100,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [primaryColor, Color(0xFF00FFB9)],
+                            colors: [primaryColor, const Color(0xFF00FFB9)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -519,18 +531,18 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                             BoxShadow(
                               color: primaryColor.withOpacity(0.4),
                               blurRadius: 24,
-                              offset: Offset(0, 8),
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),
-                        child: Icon(Icons.play_arrow, color: Colors.white, size: 48),
+                        child: const Icon(Icons.play_arrow, color: Colors.white, size: 48),
                       ),
 
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
                       ShaderMask(
                         shaderCallback: (bounds) => LinearGradient(
-                          colors: [primaryColor, Color(0xFF00FFB9)],
+                          colors: [primaryColor, const Color(0xFF00FFB9)],
                         ).createShader(bounds),
                         child: Text(
                           'Ready to Analyze Videos',
@@ -540,7 +552,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                         ),
                       ),
 
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
                       Text(
                         'Search for videos by keywords or paste\na YouTube URL to get started with AI-\npowered analytics',
@@ -550,7 +562,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                         ),
                       ),
 
-                      SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
                       // Feature Tags with Gradient Borders
                       Wrap(
@@ -559,18 +571,20 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                         children: [
                           _buildFeatureTag('Smart Search', primaryColor, isDarkMode),
                           _buildFeatureTag('AI Sentiment', secondaryColor, isDarkMode),
-                          _buildFeatureTag('Deep Analytics', Color(0xFF00FFB9), isDarkMode),
+                          _buildFeatureTag('Deep Analytics', const Color(0xFF00FFB9), isDarkMode),
                         ],
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
       ),
-    );
+    ),
+  ),
+  ),
+);
   }
 
   Widget _buildNavItem(IconData icon, String label, String route, bool isActive, bool isDarkMode, Color primaryColor) {
@@ -581,7 +595,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isActive
                   ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
@@ -595,7 +609,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                       BoxShadow(
                         color: primaryColor.withOpacity(0.3),
                         blurRadius: 8,
-                        offset: Offset(0, 2),
+                        offset: const Offset(0, 2),
                       ),
                     ]
                   : null,
@@ -606,7 +620,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
               size: 20,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             label,
             style: TextStyle(
@@ -632,7 +646,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
               onBackToSearch: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                   (route) => false,
                 );
               },
@@ -648,7 +662,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
               onBackToSearch: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                   (route) => false,
                 );
               },
@@ -664,7 +678,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
               onBackToSearch: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                   (route) => false,
                 );
               },
@@ -677,7 +691,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
 
   Widget _buildFeatureTag(String text, Color color, bool isDarkMode) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
@@ -689,7 +703,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
           BoxShadow(
             color: color.withOpacity(0.2),
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -711,7 +725,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
               ],
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Text(
             text,
             style: TextStyle(

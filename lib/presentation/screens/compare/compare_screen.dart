@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../services/youtube_service.dart';
-import '../../services/sentiment_service.dart';
-import 'dart:convert';
+import 'package:insight_tube/services/youtube_service.dart';
+import 'package:insight_tube/services/sentiment_service.dart';
 import '../analytics/analytics_screen.dart';
 import '../history/history_screen.dart';
 import '../home/home_screen.dart';
-import 'dart:io' show Platform;
 
 class CompareScreen extends StatefulWidget {
   final VoidCallback? onBackToSearch;
@@ -21,7 +19,7 @@ class _CompareScreenState extends State<CompareScreen> {
   final SentimentService _sentimentService = SentimentService();
 
   final TextEditingController urlController = TextEditingController(); // Define controller here or check if it's already defined inside build
-  List<Map<String, dynamic>> _videosToCompare = [];
+  final List<Map<String, dynamic>> _videosToCompare = [];
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -30,7 +28,7 @@ class _CompareScreenState extends State<CompareScreen> {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
-        duration: Duration(seconds: 4),
+        duration: const Duration(seconds: 4),
       ),
     );
   }
@@ -46,7 +44,7 @@ class _CompareScreenState extends State<CompareScreen> {
     return Container(
       decoration: BoxDecoration(
         gradient: isDarkMode
-            ? LinearGradient(
+            ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -55,7 +53,7 @@ class _CompareScreenState extends State<CompareScreen> {
                   Color(0xFF0A0E27),
                 ],
               )
-            : LinearGradient(
+            : const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -77,23 +75,23 @@ class _CompareScreenState extends State<CompareScreen> {
                 height: 32,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [primaryColor, Color(0xFF00FFB9)],
+                    colors: [primaryColor, const Color(0xFF00FFB9)],
                   ),
                   borderRadius: BorderRadius.circular(6),
                   boxShadow: [
                     BoxShadow(
                       color: primaryColor.withOpacity(0.3),
                       blurRadius: 8,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                child: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               ShaderMask(
                 shaderCallback: (bounds) => LinearGradient(
-                  colors: [primaryColor, Color(0xFF00FFB9)],
+                  colors: [primaryColor, const Color(0xFF00FFB9)],
                 ).createShader(bounds),
                 child: Text(
                   'InsightTube',
@@ -107,8 +105,8 @@ class _CompareScreenState extends State<CompareScreen> {
           ),
           actions: [
             Container(
-              margin: EdgeInsets.only(right: 16),
-              padding: EdgeInsets.all(8),
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isDarkMode
                     ? Colors.white.withOpacity(0.1)
@@ -133,8 +131,8 @@ class _CompareScreenState extends State<CompareScreen> {
             children: [
               // Navigation Grid
               Container(
-                margin: EdgeInsets.all(16),
-                padding: EdgeInsets.all(16),
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isDarkMode
                       ? Colors.white.withOpacity(0.05)
@@ -150,7 +148,7 @@ class _CompareScreenState extends State<CompareScreen> {
                     BoxShadow(
                       color: primaryColor.withOpacity(0.1),
                       blurRadius: 20,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -165,7 +163,7 @@ class _CompareScreenState extends State<CompareScreen> {
                           () {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                          MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                               (route) => false,
                         );
                       },
@@ -185,7 +183,7 @@ class _CompareScreenState extends State<CompareScreen> {
                               onBackToSearch: () {
                                 Navigator.pushAndRemoveUntil(
                                   context,
-                                  MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                                       (route) => false,
                                 );
                               },
@@ -218,7 +216,7 @@ class _CompareScreenState extends State<CompareScreen> {
                               onBackToSearch: () {
                                 Navigator.pushAndRemoveUntil(
                                   context,
-                                  MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                                       (route) => false,
                                 );
                               },
@@ -234,7 +232,7 @@ class _CompareScreenState extends State<CompareScreen> {
 
             // Comparison Content Section
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -246,19 +244,19 @@ class _CompareScreenState extends State<CompareScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   if (_errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Text(
                         'Error: $_errorMessage',
-                        style: TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ),
 
                   if (_isLoading)
-                    Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
+                    const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
 
                   if (!_isLoading && _videosToCompare.length < 2)
                     _buildNoVideosToCompare(bodyTextColor, cardColor),
@@ -270,15 +268,15 @@ class _CompareScreenState extends State<CompareScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildComparisonCard(_videosToCompare[0], bodyTextColor, cardColor),
-                          SizedBox(width: 16),
+                          const SizedBox(width: 16),
                           _buildComparisonCard(_videosToCompare[1], bodyTextColor, cardColor),
-                          SizedBox(width: 16), // Padding for last card
+                          const SizedBox(width: 16), // Padding for last card
                         ],
                       ),
                     ),
 
                   // Add buffer space
-                  SizedBox(height: 32),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -291,8 +289,8 @@ class _CompareScreenState extends State<CompareScreen> {
   Widget _buildNoVideosToCompare(Color bodyTextColor, Color cardColor) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(32),
-      margin: EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(32),
+      margin: const EdgeInsets.only(top: 16),
       decoration: BoxDecoration(
         // Use dynamic colors
         color: cardColor,
@@ -304,17 +302,17 @@ class _CompareScreenState extends State<CompareScreen> {
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color(0xFF6366F1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.compare_arrows,
               color: Colors.white,
               size: 40,
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Text(
             'No Videos to Compare',
             style: TextStyle(
@@ -323,7 +321,7 @@ class _CompareScreenState extends State<CompareScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             'Add videos to start comparing their\nperformance metrics',
             textAlign: TextAlign.center,
@@ -333,20 +331,20 @@ class _CompareScreenState extends State<CompareScreen> {
               height: 1.5,
             ),
           ),
-          SizedBox(height: 32),
-          Container(
+          const SizedBox(height: 32),
+          SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _showAddVideoDialog,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE53935),
-                padding: EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: const Color(0xFFE53935),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 elevation: 0,
               ),
-              child: Text(
+              child: const Text(
                 'Add Video',
                 style: TextStyle(
                   color: Colors.white,
@@ -371,7 +369,7 @@ class _CompareScreenState extends State<CompareScreen> {
 
     return Container(
       width: 300,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         // Use dynamic colors
         color: cardColor,
@@ -389,7 +387,7 @@ class _CompareScreenState extends State<CompareScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             video['title'],
             style: TextStyle(
@@ -400,7 +398,7 @@ class _CompareScreenState extends State<CompareScreen> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           _buildComparisonMetric('Views', stats['viewCount'], bodyTextColor),
           _buildComparisonMetric('Likes', stats['likeCount'], bodyTextColor),
           _buildComparisonMetric('Comments', sentiment['total_comments'].toString(), bodyTextColor),
@@ -444,13 +442,13 @@ class _CompareScreenState extends State<CompareScreen> {
       bool isActive,
       VoidCallback onTap,
       ) {
-    Color activeColor = Color(0xFF6366F1);
+    Color activeColor = const Color(0xFF6366F1);
 
     if (label == 'History') {
-      activeColor = Color(0xFFFF9800);
+      activeColor = const Color(0xFFFF9800);
     }
     if (label == 'Search') {
-      activeColor = Color(0xFFE53935);
+      activeColor = const Color(0xFFE53935);
     }
 
     // Dynamic access to theme for background color
@@ -461,7 +459,7 @@ class _CompareScreenState extends State<CompareScreen> {
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: itemBgColor,
               borderRadius: BorderRadius.circular(8),
@@ -473,7 +471,7 @@ class _CompareScreenState extends State<CompareScreen> {
               size: 20,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             label,
             style: TextStyle(
@@ -506,7 +504,7 @@ class _CompareScreenState extends State<CompareScreen> {
           child: SingleChildScrollView(
             child: Padding(
               // Increased padding to definitively absorb the 14px overflow
-              padding: EdgeInsets.fromLTRB(24, 24, 24, 32),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,9 +517,9 @@ class _CompareScreenState extends State<CompareScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       color: dialogScaffoldColor,
                       borderRadius: BorderRadius.circular(8),
@@ -537,7 +535,7 @@ class _CompareScreenState extends State<CompareScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -553,7 +551,7 @@ class _CompareScreenState extends State<CompareScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () async {
                           // Define controller locally if it was local, but assuming I can access the one in buffer if I find where it's defined.
@@ -633,28 +631,14 @@ class _CompareScreenState extends State<CompareScreen> {
                             }
                           }
                         },
-                                final errorBody = json.decode(response.body);
-                                _errorMessage = errorBody['error'] ?? 'Failed to search for video (Status: ${response.statusCode}).';
-                                _showErrorSnackbar(_errorMessage!);
-                              }
-                            } catch (e) {
-                              _errorMessage = 'Network error: $e. Check your backend server status (http://192.168.0.103:3001).';
-                              _showErrorSnackbar(_errorMessage!);
-                            } finally {
-                              setState(() {
-                                _isLoading = false;
-                              });
-                            }
-                          }
-                        },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFE53935),
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          backgroundColor: const Color(0xFFE53935),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Add Video',
                           style: TextStyle(
                             color: Colors.white,

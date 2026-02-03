@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../analytics/analytics_screen.dart';
-import '../compare/compare_screen.dart';
 import '../home/home_screen.dart';
-import 'dart:io' show Platform;
+import '../compare/compare_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   final VoidCallback? onBackToSearch;
@@ -72,7 +71,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Container(
       decoration: BoxDecoration(
         gradient: isDarkMode
-            ? LinearGradient(
+            ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -81,7 +80,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Color(0xFF0A0E27),
                 ],
               )
-            : LinearGradient(
+            : const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -103,23 +102,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 height: 32,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [primaryColor, Color(0xFF00FFB9)],
+                    colors: [primaryColor, const Color(0xFF00FFB9)],
                   ),
                   borderRadius: BorderRadius.circular(6),
                   boxShadow: [
                     BoxShadow(
                       color: primaryColor.withOpacity(0.3),
                       blurRadius: 8,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                child: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               ShaderMask(
                 shaderCallback: (bounds) => LinearGradient(
-                  colors: [primaryColor, Color(0xFF00FFB9)],
+                  colors: [primaryColor, const Color(0xFF00FFB9)],
                 ).createShader(bounds),
                 child: Text(
                   'InsightTube',
@@ -133,8 +132,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           actions: [
             Container(
-              margin: EdgeInsets.only(right: 16),
-              padding: EdgeInsets.all(8),
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isDarkMode
                     ? Colors.white.withOpacity(0.1)
@@ -158,8 +157,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           children: [
             // Navigation Grid
             Container(
-              margin: EdgeInsets.all(16),
-              padding: EdgeInsets.all(16),
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isDarkMode
                     ? Colors.white.withOpacity(0.05)
@@ -175,7 +174,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   BoxShadow(
                     color: primaryColor.withOpacity(0.1),
                     blurRadius: 20,
-                    offset: Offset(0, 4),
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -190,7 +189,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         () {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                        MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                             (route) => false,
                       );
                     },
@@ -210,7 +209,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             onBackToSearch: () {
                               Navigator.pushAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                                MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                                     (route) => false,
                               );
                             },
@@ -234,7 +233,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             onBackToSearch: () {
                               Navigator.pushAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                                MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                                     (route) => false,
                               );
                             },
@@ -259,7 +258,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
           // History Header
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -273,7 +272,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 TextButton(
                   onPressed: _fetchHistory,
-                  child: Text(
+                  child: const Text(
                     'Refresh',
                     style: TextStyle(
                       color: Color(0xFFFF9800),
@@ -286,7 +285,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
 
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
           Expanded(
             child: _buildHistoryContent(bodyTextColor, cardColor),
@@ -298,7 +297,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildHistoryContent(Color bodyTextColor, Color cardColor) {
     if (_isLoading) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(color: Color(0xFFFF9800)),
       );
     }
@@ -309,7 +308,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           child: Text(
             'Error: $_error',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.redAccent, fontSize: 16),
+            style: const TextStyle(color: Colors.redAccent, fontSize: 16),
           ),
         ),
       );
@@ -317,25 +316,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (_history.isEmpty) {
       return Padding(
         // Padding adjusted to include the bottom buffer
-        padding: EdgeInsets.fromLTRB(32, 0, 32, 32),
+        padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               width: 100,
               height: 100,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFFFF9800),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.history,
                 color: Colors.white,
                 size: 50,
               ),
             ),
-            SizedBox(height: 32),
-            Text(
+            const SizedBox(height: 32),
+            const Text(
               'No Analysis History',
               style: TextStyle(
                 color: Color(0xFFFF9800),
@@ -343,7 +342,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Your analyzed videos will appear here for future reference',
               textAlign: TextAlign.center,
@@ -353,37 +352,37 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 height: 1.5,
               ),
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Color(0xFFFF9800).withOpacity(0.3),
+                  color: const Color(0xFFFF9800).withOpacity(0.3),
                   width: 1,
                 ),
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Color(0xFFFF9800),
+                      color: const Color(0xFFFF9800),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.lightbulb,
                       color: Colors.white,
                       size: 16,
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Tip:',
                           style: TextStyle(
                             color: Color(0xFFFF9800),
@@ -391,7 +390,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           'Start analyzing videos to build your personal analytics library',
                           style: TextStyle(
@@ -406,26 +405,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 40),
-            Container(
+            const SizedBox(height: 40),
+            SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                    MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                         (route) => false,
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF9800),
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: const Color(0xFFFF9800),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
                 ),
-                child: Text(
+                child: const Text(
                   'Start Analyzing',
                   style: TextStyle(
                     color: Colors.white,
@@ -440,7 +439,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       );
     }
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(16, 0, 16, 32),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       itemCount: _history.length,
       itemBuilder: (context, index) {
         final item = _history[index];
@@ -472,7 +471,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       bool isActive,
       VoidCallback onTap,
       ) {
-    Color activeColor = Color(0xFFFF9800); // Orange color for History screen active state
+    Color activeColor = const Color(0xFFFF9800); // Orange color for History screen active state
     final itemBgColor = Theme.of(context).scaffoldBackgroundColor;
 
     return GestureDetector(
@@ -480,7 +479,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: itemBgColor,
               borderRadius: BorderRadius.circular(8),
@@ -492,7 +491,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               size: 20,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             label,
             style: TextStyle(
@@ -518,8 +517,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(bottom: 16),
-        padding: EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(12),
@@ -536,7 +535,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,7 +550,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'Analyzed: ${DateTime.parse(timestamp).toString().split('.')[0]}',
                     style: TextStyle(

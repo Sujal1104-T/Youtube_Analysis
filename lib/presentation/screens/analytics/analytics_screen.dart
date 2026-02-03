@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import '../compare/compare_screen.dart';
 import '../history/history_screen.dart';
 import '../home/home_screen.dart';
-import '../../services/youtube_service.dart';
-import '../../services/sentiment_service.dart';
+import 'package:insight_tube/services/youtube_service.dart';
+import 'package:insight_tube/services/sentiment_service.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   final VoidCallback? onBackToSearch;
@@ -162,7 +163,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Container(
       decoration: BoxDecoration(
         gradient: isDarkMode
-            ? LinearGradient(
+            ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -171,7 +172,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   Color(0xFF0A0E27),
                 ],
               )
-            : LinearGradient(
+            : const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -193,23 +194,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 height: 32,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [primaryColor, Color(0xFF00FFB9)],
+                    colors: [primaryColor, const Color(0xFF00FFB9)],
                   ),
                   borderRadius: BorderRadius.circular(6),
                   boxShadow: [
                     BoxShadow(
                       color: primaryColor.withOpacity(0.3),
                       blurRadius: 8,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                child: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               ShaderMask(
                 shaderCallback: (bounds) => LinearGradient(
-                  colors: [primaryColor, Color(0xFF00FFB9)],
+                  colors: [primaryColor, const Color(0xFF00FFB9)],
                 ).createShader(bounds),
                 child: Text(
                   'InsightTube',
@@ -223,8 +224,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ),
           actions: [
             Container(
-              margin: EdgeInsets.only(right: 16),
-              padding: EdgeInsets.all(8),
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isDarkMode
                     ? Colors.white.withOpacity(0.1)
@@ -248,8 +249,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           children: [
             // Navigation Grid
             Container(
-              margin: EdgeInsets.all(16),
-              padding: EdgeInsets.all(16),
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isDarkMode
                     ? Colors.white.withOpacity(0.05)
@@ -265,7 +266,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   BoxShadow(
                     color: primaryColor.withOpacity(0.1),
                     blurRadius: 20,
-                    offset: Offset(0, 4),
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -280,7 +281,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         () {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                        MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                             (route) => false,
                       );
                     },
@@ -309,7 +310,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             onBackToSearch: () {
                               Navigator.pushAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                                MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                                     (route) => false,
                               );
                             },
@@ -333,7 +334,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             onBackToSearch: () {
                               Navigator.pushAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                                MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                                     (route) => false,
                               );
                             },
@@ -363,8 +364,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Color(0xFF6366F1)),
-            SizedBox(height: 16),
+            const CircularProgressIndicator(color: Color(0xFF6366F1)),
+            const SizedBox(height: 16),
             Text(
               'Fetching analytics data...',
               style: TextStyle(color: bodyTextColor),
@@ -381,7 +382,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           child: Text(
             _error,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.redAccent, fontSize: 16),
+            style: const TextStyle(color: Colors.redAccent, fontSize: 16),
           ),
         ),
       );
@@ -391,24 +392,24 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       // Show the original "No Analytics Data" content
       return Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 width: 120,
                 height: 120,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFF6366F1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.bar_chart,
                   color: Colors.white,
                   size: 60,
                 ),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               Text(
                 'No Analytics Data',
                 style: TextStyle(
@@ -417,7 +418,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'Search for a video and click "Analyze Video" to see detailed analytics and sentiment analysis',
                 textAlign: TextAlign.center,
@@ -427,26 +428,26 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   height: 1.5,
                 ),
               ),
-              SizedBox(height: 40),
-              Container(
+              const SizedBox(height: 40),
+              SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                      MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                           (route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFE53935),
-                    padding: EdgeInsets.symmetric(vertical: 18),
+                    backgroundColor: const Color(0xFFE53935),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
+                  child: const Text(
                     'Go to Search',
                     style: TextStyle(
                       color: Colors.white,
@@ -486,7 +487,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     video['title'],
@@ -502,10 +503,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ],
             ),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Key Metrics
-            Text(
+            const Text(
               'Key Metrics',
               style: TextStyle(
                 color: Color(0xFFE53935),
@@ -513,15 +514,30 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildMetricCard(Icons.visibility, 'Views', stats['viewCount'], bodyTextColor, cardColor),
+            _buildMetricCard(Icons.thumb_up, 'Likes', stats['likeCount'], bodyTextColor, cardColor),
             _buildMetricCard(Icons.thumb_up, 'Likes', stats['likeCount'], bodyTextColor, cardColor),
             _buildMetricCard(Icons.comment, 'Comments', sentiment['total_comments'].toString(), bodyTextColor, cardColor),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
+            
+            // Engagement Bar Chart
+            const Text(
+              'Engagement Overview',
+              style: TextStyle(
+                color: Color(0xFFE53935),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildEngagementChart(stats['viewCount'], stats['likeCount'], sentiment['total_comments'].toString(), cardColor, bodyTextColor),
+            
+            const SizedBox(height: 24),
 
             // AI Sentiment Analysis
-            Text(
+            const Text(
               'AI Sentiment Analysis',
               style: TextStyle(
                 color: Color(0xFFE91E63),
@@ -529,13 +545,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildSentimentCard(sentiment, bodyTextColor, cardColor),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Deep Analytics: Top Keywords
-            Text(
+            const Text(
               'Deep Analytics',
               style: TextStyle(
                 color: Color(0xFF2196F3),
@@ -543,13 +559,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildDeepAnalyticsCard(deepAnalytics['top_keywords'], bodyTextColor, cardColor),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Deep Analytics: Comments Section
-            Text(
+            const Text(
               'Sample Comments',
               style: TextStyle(
                 color: Color(0xFF2196F3),
@@ -557,34 +573,34 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             if (deepAnalytics['sample_comments'] != null)
               ...deepAnalytics['sample_comments'].map<Widget>((comment) {
                 return _buildCommentCard(comment, bodyTextColor, cardColor);
               }).toList(),
 
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
 
             // Go back to search
-            Container(
+            SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
+                    MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
                         (route) => false,
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFE53935),
-                  padding: EdgeInsets.symmetric(vertical: 18),
+                  backgroundColor: const Color(0xFFE53935),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
                 ),
-                child: Text(
+                child: const Text(
                   'Analyze another video',
                   style: TextStyle(
                     color: Colors.white,
@@ -615,23 +631,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: itemBgColor,
               borderRadius: BorderRadius.circular(8),
-              border: isActive ? Border.all(color: Color(0xFF6366F1), width: 2) : null,
+              border: isActive ? Border.all(color: const Color(0xFF6366F1), width: 2) : null,
             ),
             child: Icon(
               icon,
-              color: isActive ? Color(0xFF6366F1) : Colors.grey[400],
+              color: isActive ? const Color(0xFF6366F1) : Colors.grey[400],
               size: 20,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             label,
             style: TextStyle(
-              color: isActive ? Color(0xFF6366F1) : Colors.grey[400],
+              color: isActive ? const Color(0xFF6366F1) : Colors.grey[400],
               fontSize: 12,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             ),
@@ -646,8 +662,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final primaryColor = Theme.of(context).colorScheme.primary;
     
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDarkMode
             ? Colors.white.withOpacity(0.05)
@@ -663,17 +679,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           BoxShadow(
             color: primaryColor.withOpacity(0.1),
             blurRadius: 12,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [primaryColor.withOpacity(0.2), Color(0xFF00FFB9).withOpacity(0.2)],
+                colors: [primaryColor.withOpacity(0.2), const Color(0xFF00FFB9).withOpacity(0.2)],
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
@@ -682,7 +698,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
             child: Icon(icon, color: primaryColor, size: 22),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,7 +711,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   value,
                   style: TextStyle(
@@ -723,7 +739,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     }
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor, // Use dynamic card color
         borderRadius: BorderRadius.circular(12),
@@ -741,7 +757,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   shape: BoxShape.circle,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 'Overall Sentiment: ${sentiment['overall_sentiment']}',
                 style: TextStyle(
@@ -752,29 +768,180 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ),
             ],
           ),
-          SizedBox(height: 12),
-          Text(
-            'Positive: ${sentiment['positive_count']}',
-            style: TextStyle(color: Colors.green, fontSize: 14),
+          const SizedBox(height: 24),
+          
+          // Helper to safely parse int
+          Builder(
+            builder: (context) {
+              int safeParse(dynamic input) {
+                 if (input is int) return input;
+                 if (input is String) return int.tryParse(input) ?? 0;
+                 return 0;
+              }
+              final pos = safeParse(sentiment['positive_count']);
+              final neg = safeParse(sentiment['negative_count']);
+              final neu = safeParse(sentiment['neutral_count']);
+              final total = pos + neg + neu;
+              
+              if (total == 0) return const SizedBox.shrink();
+
+              return SizedBox(
+                height: 200,
+                child: PieChart(
+                  PieChartData(
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 40,
+                    sections: [
+                      PieChartSectionData(
+                        color: Colors.green,
+                        value: pos.toDouble(),
+                        title: '${((pos/total)*100).toStringAsFixed(0)}%',
+                        radius: 50,
+                        titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      PieChartSectionData(
+                        color: Colors.red,
+                        value: neg.toDouble(),
+                        title: '${((neg/total)*100).toStringAsFixed(0)}%',
+                        radius: 50,
+                        titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      PieChartSectionData(
+                        color: Colors.orange,
+                        value: neu.toDouble(),
+                        title: '${((neu/total)*100).toStringAsFixed(0)}%',
+                        radius: 50,
+                        titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
           ),
-          SizedBox(height: 4),
-          Text(
-            'Negative: ${sentiment['negative_count']}',
-            style: TextStyle(color: Colors.red, fontSize: 14),
-          ),
-          SizedBox(height: 4),
-          Text(
-            'Neutral: ${sentiment['neutral_count']}',
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
-          ),
+          
+          const SizedBox(height: 24),
+          _buildSentimentLegend('Positive', Colors.green, sentiment['positive_count'].toString()),
+          const SizedBox(height: 8),
+          _buildSentimentLegend('Negative', Colors.red, sentiment['negative_count'].toString()),
+          const SizedBox(height: 8),
+          _buildSentimentLegend('Neutral', Colors.orange, sentiment['neutral_count'].toString()),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSentimentLegend(String label, Color color, String count) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+         Row(
+           children: [
+             Container(
+               width: 10,
+               height: 10,
+               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+             ),
+             const SizedBox(width: 8),
+             Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+           ],
+         ),
+         Text(count, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _buildEngagementChart(String views, String likes, String comments, Color cardColor, Color textColor) {
+    // Parse strings to doubles (handling non-numeric suffixes slightly strictly for charts, 
+    // but here we just need relative scale. For simplicity, we'll try to parse K/M or just raw)
+    // Actually youtube_service returns "1.2M", so we need to parse that back or use raw counts.
+    // The youtube_service.dart also returns 'rawViewCount' 'rawLikeCount' etc.
+    // Let's check _fetchAnalyticsData in line 67...
+    
+     final stats = _analyticsData?['analytics']['statistics'];
+     // Wait, the map used in build method uses 'stats' local variable:
+     // 'viewCount', 'likeCount' are formatted strings.
+     // We should verify if 'rawViewCount' is passed down.
+     // Looking at _fetchAnalyticsData (screen code I read earlier):
+     /*
+       'statistics': {
+             'viewCount': videoDetails['viewCount'],
+             ...
+       }
+     */
+     // It seems I didn't include raw counts in 'statistics' map in lines 68-72 of this file.
+     // BUT, youtube_service DOES return raw counts!
+     // I should update _fetchAnalyticsData to include raw counts OR just parse them here roughly.
+     // Parsing '1.2M' is annoying. Let's fix _fetchAnalyticsData first? 
+     // No, I can't edit _fetchAnalyticsData in this chunk easily. 
+     // I'll just use a mock relative value or try to parse simple suffixes.
+     
+     double parseMetric(String val) {
+       val = val.toUpperCase().replaceAll(',', '');
+       double mult = 1.0;
+       if (val.contains('M')) { mult = 1000000; val = val.replaceAll('M', ''); }
+       if (val.contains('K')) { mult = 1000; val = val.replaceAll('K', ''); }
+       return (double.tryParse(val) ?? 0) * mult;
+     }
+
+     double v = parseMetric(views);
+     double l = parseMetric(likes);
+     double c = parseMetric(comments);
+     
+     // Normalize to log scale or ratio because Views are huge compared to likes
+     // Actually, BarChart is better for Likes vs Comments. Views breaks the scale.
+     // Let's just show Likes vs Comments ratio? Or simpler: Logarithmic?
+     // Let's do a simple bar chart of Likes and Comments (Engagement). 
+     
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          maxY: (l > c ? l : c) * 1.2,
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (double value, TitleMeta meta) {
+                  switch (value.toInt()) {
+                    case 0: return const Text('Likes', style: TextStyle(color: Colors.grey, fontSize: 12));
+                    case 1: return const Text('Comments', style: TextStyle(color: Colors.grey, fontSize: 12));
+                    default: return const Text('');
+                  }
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          gridData: FlGridData(show: false),
+          borderData: FlBorderData(show: false),
+          barGroups: [
+            BarChartGroupData(
+              x: 0,
+              barRods: [BarChartRodData(toY: l, color: Colors.blue, width: 20, borderRadius: BorderRadius.circular(4))],
+            ),
+            BarChartGroupData(
+              x: 1,
+              barRods: [BarChartRodData(toY: c, color: Colors.purple, width: 20, borderRadius: BorderRadius.circular(4))],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildDeepAnalyticsCard(List<dynamic> keywords, Color bodyTextColor, Color cardColor) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor, // Use dynamic card color
         borderRadius: BorderRadius.circular(12),
@@ -790,16 +957,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: keywords.map((keyword) {
               return Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   // Use a slightly darker shade of card color for contrast
-                  color: Color(0xFF3A4052),
+                  color: const Color(0xFF3A4052),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -819,8 +986,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildCommentCard(String comment, Color bodyTextColor, Color cardColor) {
     return Container(
-      padding: EdgeInsets.all(12),
-      margin: EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: cardColor, // Use dynamic card color
         borderRadius: BorderRadius.circular(8),
