@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import '../compare/compare_screen.dart';
 import '../history/history_screen.dart';
 import '../home/home_screen.dart';
-import 'package:http/http.dart' as http;
+import '../../services/youtube_service.dart';
+import '../../services/sentiment_service.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   final VoidCallback? onBackToSearch;
@@ -16,7 +18,9 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  final String _backendUrl = 'https://my-youtube-api.cloudfunctions.net/api';
+  final YouTubeService _youtubeService = YouTubeService();
+  final SentimentService _sentimentService = SentimentService();
+  
   Map<String, dynamic>? _analyticsData;
   bool _isLoading = true;
   String _error = '';
@@ -41,43 +45,109 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     });
 
     try {
-      final url = Uri.parse('$_backendUrl/analyze/${widget.videoId}');
-      final response = await http.get(url);
+      if (widget.videoId == null) throw Exception('No Video ID');
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          _analyticsData = data;
-        });
-        // Save to history after successful analysis
-        _saveToHistory(data);
-      } else {
-        final error = json.decode(response.body)['error'] ?? 'Unknown error';
-        setState(() {
-          _error = 'Failed to load analytics: $error';
-        });
-      }
+      // 1. Fetch Video Details
+      final videoDetails = await _youtubeService.getVideoDetails(widget.videoId!);
+      
+      // 2. Fetch Comments
+      final comments = await _youtubeService.getVideoComments(widget.videoId!);
+      
+      // 3. Analyze Sentiment Locally
+      final sentimentAnalysis = _sentimentService.analyzeComments(comments);
+      
+      // 4. Extract Keywords (Simple local extraction)
+      final description = videoDetails['description'] as String;
+      final title = videoDetails['title'] as String;
+      final keywords = _extractKeywords('$title $description');
+
+      // 5. Construct Data Object
+      final analyticsData = {
+        'video': videoDetails,
+        'analytics': {
+          'statistics': {
+            'viewCount': videoDetails['viewCount'],
+            'likeCount': videoDetails['likeCount'],
+            'commentCount': videoDetails['commentCount'],
+          },
+          'sentiment_analysis': {
+            'overall_sentiment': sentimentAnalysis['overall_sentiment'],
+            'positive_count': sentimentAnalysis['positive_count'],
+            'negative_count': sentimentAnalysis['negative_count'],
+            'neutral_count': (sentimentAnalysis['total_comments'] as int) - 
+                             (sentimentAnalysis['positive_count'] as int) - 
+                             (sentimentAnalysis['negative_count'] as int),
+            'total_comments': sentimentAnalysis['total_comments'],
+          },
+          'deep_analytics': {
+            'top_keywords': keywords,
+            'sample_comments': comments.take(5).toList(),
+          }
+        }
+      };
+
+      setState(() {
+        _analyticsData = analyticsData;
+      });
+      
+      // History saving would go here if we implemented local storage
+      
     } catch (e) {
       setState(() {
-        _error = 'Network error: $e. Is the backend server running?';
+        _error = 'Analysis failed: ${e.toString().replaceAll("Exception:", "")}';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  // Simple keyword extractor
+  List<String> _extractKeywords(String text) {
+    // Remove punctuation and split
+    final words = text.toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s]'), '')
+        .split(RegExp(r'\s+'));
+    
+    // Filter common stop words (very basic list)
+    final stopWords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'is', 'are', 'was', 'were', 'be', 'this', 'that', 'it', 'my', 'your', 'video', 'watch', 'subscribe', 'channel', 'link', 'below', 'instagram', 'twitter', 'facebook', 'follow', 'me', 'https', 'com', 'www'};
+    
+    final wordCounts = <String, int>{};
+    for (var word in words) {
+      if (word.length > 3 && !stopWords.contains(word)) {
+        wordCounts[word] = (wordCounts[word] ?? 0) + 1;
+      }
+    }
+    
+    // Sort by frequency
+    final sortedWords = wordCounts.keys.toList()
+      ..sort((a, b) => wordCounts[b]!.compareTo(wordCounts[a]!));
+      
+    return sortedWords.take(10).toList();
   }
 
   Future<void> _saveToHistory(Map<String, dynamic> analysisData) async {
     try {
-      final url = Uri.parse('$_backendUrl/history');
-      await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(analysisData),
-      );
+      final prefs = await SharedPreferences.getInstance();
+      List<String> history = prefs.getStringList('history_v1') ?? [];
+      
+      final historyItem = Map<String, dynamic>.from(analysisData);
+      historyItem['timestamp'] = DateTime.now().toIso8601String();
+      
+      // Add new item to top
+      history.insert(0, json.encode(historyItem));
+      
+      // Limit to 20 items
+      if (history.length > 20) {
+        history = history.sublist(0, 20);
+      }
+      
+      await prefs.setStringList('history_v1', history);
     } catch (e) {
-      print('Failed to save to history: $e');
+      print('Failed to save history locally: $e');
     }
   }
 

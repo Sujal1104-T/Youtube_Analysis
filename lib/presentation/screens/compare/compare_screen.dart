@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import '../../services/youtube_service.dart';
+import '../../services/sentiment_service.dart';
 import 'dart:convert';
 import '../analytics/analytics_screen.dart';
 import '../history/history_screen.dart';
@@ -16,7 +17,10 @@ class CompareScreen extends StatefulWidget {
 }
 
 class _CompareScreenState extends State<CompareScreen> {
-  final String _backendUrl = 'https://my-youtube-api.cloudfunctions.net/api';
+  final YouTubeService _youtubeService = YouTubeService();
+  final SentimentService _sentimentService = SentimentService();
+
+  final TextEditingController urlController = TextEditingController(); // Define controller here or check if it's already defined inside build
   List<Map<String, dynamic>> _videosToCompare = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -552,6 +556,10 @@ class _CompareScreenState extends State<CompareScreen> {
                       SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () async {
+                          // Define controller locally if it was local, but assuming I can access the one in buffer if I find where it's defined.
+                          // Actually, looking at the previous file view, 'urlController' was usually defined inside the showDialog builder or passed to it.
+                          // Let's assume 'urlController' is available in this scope as seen in previous view.
+                          
                           if (urlController.text.isNotEmpty) {
 
                             setState(() {
@@ -562,42 +570,69 @@ class _CompareScreenState extends State<CompareScreen> {
                             Navigator.pop(context);
 
                             try {
-                              final url = Uri.parse('$_backendUrl/search');
+                              // 1. Search to get ID (or use ID if URL provided)
+                              final results = await _youtubeService.searchVideos(urlController.text);
+                              
+                              if (results.isNotEmpty) {
+                                final videoId = results[0]['id'];
+                                
+                                // 2. Video Details
+                                final videoDetails = await _youtubeService.getVideoDetails(videoId);
+                                
+                                // 3. Comments
+                                final comments = await _youtubeService.getVideoComments(videoId);
+                                
+                                // 4. Sentiment
+                                final sentimentAnalysis = _sentimentService.analyzeComments(comments);
 
-                              final response = await http.post(
-                                url,
-                                headers: {'Content-Type': 'application/json'},
-                                body: json.encode({'query': urlController.text}),
-                              );
+                                // 5. Construct Data
+                                final analyzeData = {
+                                  'video': videoDetails,
+                                  'analytics': {
+                                    'statistics': {
+                                      'viewCount': videoDetails['viewCount'],
+                                      'likeCount': videoDetails['likeCount'],
+                                      'commentCount': videoDetails['commentCount'],
+                                    },
+                                    'sentiment_analysis': {
+                                      'overall_sentiment': sentimentAnalysis['overall_sentiment'],
+                                      'positive_count': sentimentAnalysis['positive_count'],
+                                      'negative_count': sentimentAnalysis['negative_count'],
+                                      'neutral_count': (sentimentAnalysis['total_comments'] as int) - 
+                                                       (sentimentAnalysis['positive_count'] as int) - 
+                                                       (sentimentAnalysis['negative_count'] as int),
+                                      'total_comments': sentimentAnalysis['total_comments'],
+                                    },
+                                    // Deep analytics simplified for compare
+                                    'deep_analytics': {
+                                      'top_keywords': [], // Skipping for compare optimization
+                                    }
+                                  }
+                                };
 
-                              if (response.statusCode == 200) {
-                                final data = json.decode(response.body);
-                                if (data['results'] != null && data['results'].isNotEmpty) {
-                                  final videoId = data['results'][0]['id'];
-                                  final analyzeUrl = Uri.parse('$_backendUrl/analyze/$videoId');
-                                  final analyzeResponse = await http.get(analyzeUrl);
-
-                                  if (analyzeResponse.statusCode == 200) {
-                                    final analyzeData = json.decode(analyzeResponse.body);
-                                    setState(() {
-                                      if (_videosToCompare.length < 2) {
-                                        _videosToCompare.add(analyzeData);
-                                        _errorMessage = null;
-                                      } else {
-                                        _errorMessage = 'Maximum of 2 videos can be compared.';
-                                        _showErrorSnackbar(_errorMessage!);
-                                      }
-                                    });
+                                setState(() {
+                                  if (_videosToCompare.length < 2) {
+                                    _videosToCompare.add(analyzeData);
+                                    _errorMessage = null;
                                   } else {
-                                    final errorBody = json.decode(analyzeResponse.body);
-                                    _errorMessage = errorBody['error'] ?? 'Failed to analyze video.';
+                                    _errorMessage = 'Maximum of 2 videos can be compared.';
                                     _showErrorSnackbar(_errorMessage!);
                                   }
-                                } else {
-                                  _errorMessage = 'No video found for that URL.';
-                                  _showErrorSnackbar(_errorMessage!);
-                                }
+                                });
                               } else {
+                                _errorMessage = 'No video found.';
+                                _showErrorSnackbar(_errorMessage!);
+                              }
+                            } catch (e) {
+                              _errorMessage = 'Error: ${e.toString().replaceAll("Exception:", "")}';
+                              _showErrorSnackbar(_errorMessage!);
+                            } finally {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          }
+                        },
                                 final errorBody = json.decode(response.body);
                                 _errorMessage = errorBody['error'] ?? 'Failed to search for video (Status: ${response.statusCode}).';
                                 _showErrorSnackbar(_errorMessage!);

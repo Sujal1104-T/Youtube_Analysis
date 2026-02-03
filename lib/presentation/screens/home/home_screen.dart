@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../analytics/analytics_screen.dart';
 import '../compare/compare_screen.dart';
 import '../history/history_screen.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../../services/youtube_service.dart';
+import '../../services/sentiment_service.dart';
 import '../results/results_screen.dart';
 import 'dart:io' show Platform;
 import '../../../main.dart';
@@ -17,36 +17,37 @@ class InsightTubeticsScreen extends StatefulWidget {
 }
 
 class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with SingleTickerProviderStateMixin {
-  bool isKeywordsSelected = true;
-  TextEditingController searchController = TextEditingController();
-  final String _backendUrl = 'https://youtubeanalytics-1.onrender.com/api';
+  final TextEditingController searchController = TextEditingController();
+  final YouTubeService _youtubeService = YouTubeService();
+  // ignore: unused_field
+  final SentimentService _sentimentService = SentimentService(); // In case we need it here later
+  
   bool _isLoading = false;
-  late AnimationController _animationController;
+  late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
+    _fadeController = AnimationController(
       duration: Duration(milliseconds: 800),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
-    _animationController.forward();
+    _fadeController.forward();
   }
 
   @override
   void dispose() {
     searchController.dispose();
-    _animationController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
-  void _performSearch() async {
-    final query = searchController.text.trim();
-    if (query.isEmpty) {
+  Future<void> _performSearch() async {
+    if (searchController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter keywords or a URL to search.'),
@@ -61,65 +62,36 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
     });
 
     try {
-      final url = Uri.parse('$_backendUrl/search');
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'query': query}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['results'] != null && data['results'].isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Search successful! Displaying results.'),
-              backgroundColor: Color(0xFF00FFB9),
-            ),
-          );
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ResultsScreen(
-                videos: List<Map<String, dynamic>>.from(data['results']),
-                onBackToSearch: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => InsightTubeticsScreen()),
-                    (route) => false,
-                  );
-                },
-              ),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('No videos or channels found for "$query"'),
-              backgroundColor: Color(0xFFFF9800),
-            ),
-          );
-        }
-      } else {
-        final error = json.decode(response.body)['error'] ?? 'Unknown error';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Search failed: $error'),
-            backgroundColor: Colors.red,
+      // Serverless logic: always just search using YouTube Data API
+      // If it's a URL, we might want to extract ID and get details directly, 
+      // but for "Search" screen, searching by keyword/url query is fine.
+      
+      final results = await _youtubeService.searchVideos(searchController.text);
+      
+      // Navigate to results screen with raw data
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultsScreen(
+            results: results, 
+            searchQuery: searchController.text
           ),
-        );
-      }
+        ),
+      );
+      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Network error. Please ensure the backend is running.'),
+          content: Text('Search failed: ${e.toString().replaceAll("Exception:", "")}'),
           backgroundColor: Colors.red,
         ),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -226,10 +198,13 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
         body: FadeTransition(
           opacity: _fadeAnimation,
           child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 1000),
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Navigation Grid with Glassmorphism
                   Container(

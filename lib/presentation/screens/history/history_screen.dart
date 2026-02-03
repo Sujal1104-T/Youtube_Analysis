@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../analytics/analytics_screen.dart';
 import '../compare/compare_screen.dart';
@@ -16,7 +16,6 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  final String _backendUrl = 'https://my-youtube-api.cloudfunctions.net/api';
   List<dynamic> _history = [];
   bool _isLoading = true;
   String _error = '';
@@ -33,23 +32,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
       _error = '';
     });
     try {
-      final url = Uri.parse('$_backendUrl/history');
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          _history = data['history'];
-        });
-      } else {
-        final error = json.decode(response.body)['error'] ?? 'Unknown error';
-        setState(() {
-          _error = 'Failed to load history: $error';
-        });
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> historyStrings = prefs.getStringList('history_v1') ?? [];
+      
+      final List<dynamic> loadedHistory = [];
+      for (String item in historyStrings) {
+        try {
+          loadedHistory.add(json.decode(item));
+        } catch (e) {
+          print('Error parsing history item: $e');
+        }
       }
+
+      setState(() {
+        _history = loadedHistory;
+      });
+      
     } catch (e) {
       setState(() {
-        _error = 'Network error: $e. Is the backend server running?';
+        _error = 'Failed to load local history: $e';
       });
     } finally {
       setState(() {
