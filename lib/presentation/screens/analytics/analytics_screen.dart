@@ -83,64 +83,122 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Dynamic theme colors
-    final scaffoldColor = Theme.of(context).scaffoldBackgroundColor;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final cardColor = Theme.of(context).cardColor;
     final bodyTextColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white;
 
-    return Scaffold(
-      // Use dynamic colors
-      backgroundColor: scaffoldColor,
-      appBar: AppBar(
-        // Use dynamic colors
-        backgroundColor: scaffoldColor,
-        elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Color(0xFFE53935),
-                borderRadius: BorderRadius.circular(6),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: isDarkMode
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0A0E27),
+                  Color(0xFF151B3B),
+                  Color(0xFF0A0E27),
+                ],
+              )
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFF8FAFC),
+                  Color(0xFFE0F2FE),
+                  Color(0xFFF8FAFC),
+                ],
               ),
-              child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
-            ),
-            SizedBox(width: 12),
-            Text(
-              'InsightTube',
-              style: TextStyle(
-                color: Color(0xFFE53935),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [primaryColor, Color(0xFF00FFB9)],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
+              ),
+              SizedBox(width: 12),
+              ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [primaryColor, Color(0xFF00FFB9)],
+                ).createShader(bounds),
+                child: Text(
+                  'InsightTube',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Container(
+              margin: EdgeInsets.only(right: 16),
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
+                ),
+              ),
+              child: Icon(
+                isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+                color: primaryColor,
+                size: 20,
               ),
             ),
           ],
         ),
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: 16),
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              // Use dynamic colors
-              color: cardColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.wb_sunny_outlined, color: Colors.orange, size: 20),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Navigation Grid
-          Container(
-            margin: EdgeInsets.all(16),
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              // Use dynamic colors
-              color: cardColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
+        body: Column(
+          children: [
+            // Navigation Grid
+            Container(
+              margin: EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.white.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
             child: Row(
               children: [
                 Expanded(
@@ -223,7 +281,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           Expanded(
             child: _buildContent(bodyTextColor, cardColor),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -513,41 +572,70 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   }
 
   Widget _buildMetricCard(IconData icon, String label, String value, Color bodyTextColor, Color cardColor) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    
     return Container(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cardColor, // Use dynamic card color
-        borderRadius: BorderRadius.circular(12),
+        color: isDarkMode
+            ? Colors.white.withOpacity(0.05)
+            : Colors.white.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withOpacity(0.1)
+              : Colors.white.withOpacity(0.5),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.1),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Color(0xFFE53935).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
+              gradient: LinearGradient(
+                colors: [primaryColor.withOpacity(0.2), Color(0xFF00FFB9).withOpacity(0.2)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: primaryColor.withOpacity(0.3),
+              ),
             ),
-            child: Icon(icon, color: Color(0xFFE53935), size: 20),
+            child: Icon(icon, color: primaryColor, size: 22),
           ),
           SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(color: Colors.grey[400], fontSize: 14),
-              ),
-              SizedBox(height: 4),
-              Text(
-                value,
-                style: TextStyle(
-                  color: bodyTextColor, // Use dynamic text color
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white60 : Colors.black54,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: bodyTextColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

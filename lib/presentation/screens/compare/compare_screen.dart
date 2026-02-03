@@ -33,66 +33,123 @@ class _CompareScreenState extends State<CompareScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Dynamic theme colors
-    final scaffoldColor = Theme.of(context).scaffoldBackgroundColor;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final cardColor = Theme.of(context).cardColor;
     final bodyTextColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white;
 
-    return Scaffold(
-      // Use dynamic colors
-      backgroundColor: scaffoldColor,
-      appBar: AppBar(
-        // Use dynamic colors
-        backgroundColor: scaffoldColor,
-        elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Color(0xFFE53935),
-                borderRadius: BorderRadius.circular(6),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: isDarkMode
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0A0E27),
+                  Color(0xFF151B3B),
+                  Color(0xFF0A0E27),
+                ],
+              )
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFF8FAFC),
+                  Color(0xFFE0F2FE),
+                  Color(0xFFF8FAFC),
+                ],
               ),
-              child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
-            ),
-            SizedBox(width: 12),
-            Text(
-              'InsightTube',
-              style: TextStyle(
-                color: Color(0xFFE53935),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [primaryColor, Color(0xFF00FFB9)],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(Icons.play_arrow, color: Colors.white, size: 20),
+              ),
+              SizedBox(width: 12),
+              ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [primaryColor, Color(0xFF00FFB9)],
+                ).createShader(bounds),
+                child: Text(
+                  'InsightTube',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Container(
+              margin: EdgeInsets.only(right: 16),
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
+                ),
+              ),
+              child: Icon(
+                isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+                color: primaryColor,
+                size: 20,
               ),
             ),
           ],
         ),
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: 16),
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              // Use dynamic colors
-              color: cardColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.wb_sunny_outlined, color: Colors.orange, size: 20),
-          ),
-        ],
-      ),
-      // FINAL OVERFLOW FIX: Wrap the entire body content in a SingleChildScrollView.
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Navigation Grid
-            Container(
-              margin: EdgeInsets.all(16),
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                // Use dynamic colors
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Navigation Grid
+              Container(
+                margin: EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDarkMode
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.white.withOpacity(0.5),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
               child: Row(
                 children: [
                   Expanded(
