@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../analytics/analytics_screen.dart';
 import '../home/home_screen.dart';
 import '../compare/compare_screen.dart';
+import '../../../main.dart';
 
 class HistoryScreen extends StatefulWidget {
   final VoidCallback? onBackToSearch;
@@ -95,6 +96,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
+                ),
+              ),
+              child: Icon(
+                Icons.arrow_back,
+                color: primaryColor,
+                size: 20,
+              ),
+            ),
+            onPressed: () {
+              if (widget.onBackToSearch != null) {
+                widget.onBackToSearch!();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
           title: Row(
             children: [
               Container(
@@ -103,61 +132,50 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [primaryColor, const Color(0xFF00FFB9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 12),
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [primaryColor, const Color(0xFF00FFB9)],
-                ).createShader(bounds),
-                child: Text(
-                  'InsightTube',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'InsightTube',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: isDarkMode ? Colors.white : const Color(0xFF0A0E27),
+                    ),
                   ),
-                ),
+                  Text(
+                    'History',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
           actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 16),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDarkMode
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.black.withOpacity(0.1),
-                ),
-              ),
-              child: Icon(
-                isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-                color: primaryColor,
-                size: 20,
-              ),
+            IconButton(
+              icon: Icon(isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+              onPressed: () {
+                final appState = MyApp.of(context);
+                appState.toggleTheme();
+              },
             ),
+            const SizedBox(width: 8),
           ],
         ),
         body: Column(
           children: [
             // Navigation Grid
             Container(
-              margin: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isDarkMode
@@ -178,83 +196,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 ],
               ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildNavItem(
-                    context,
-                    Icons.search,
-                    'Search',
-                    false,
-                        () {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                            (route) => false,
-                      );
-                    },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildNavItem(Icons.search, 'Search', 'search', false, isDarkMode, primaryColor),
                   ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    context,
-                    Icons.bar_chart,
-                    'Analytics',
-                    false,
-                        () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AnalyticsScreen(
-                            onBackToSearch: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                                    (route) => false,
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                  Expanded(
+                    child: _buildNavItem(Icons.bar_chart, 'Analytics', 'analytics', false, isDarkMode, primaryColor),
                   ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    context,
-                    Icons.compare_arrows,
-                    'Compare',
-                    false,
-                        () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CompareScreen(
-                            onBackToSearch: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                                    (route) => false,
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                  Expanded(
+                    child: _buildNavItem(Icons.compare_arrows, 'Compare', 'compare', false, isDarkMode, primaryColor),
                   ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    context,
-                    Icons.history,
-                    'History',
-                    true,
-                        () {}, // Current screen, no action needed
+                  Expanded(
+                    child: _buildNavItem(Icons.history, 'History', 'history', true, isDarkMode, primaryColor),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
           // History Header
           Padding(
@@ -465,29 +423,40 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildNavItem(
-      BuildContext context,
-      IconData icon,
-      String label,
-      bool isActive,
-      VoidCallback onTap,
-      ) {
-    Color activeColor = const Color(0xFFFF9800); // Orange color for History screen active state
-    final itemBgColor = Theme.of(context).scaffoldBackgroundColor;
-
+    IconData icon,
+    String label,
+    String route,
+    bool isActive,
+    bool isDarkMode,
+    Color primaryColor,
+  ) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        _handleNavigation(route);
+      },
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: itemBgColor,
-              borderRadius: BorderRadius.circular(8),
-              border: isActive ? Border.all(color: activeColor, width: 2) : null,
+              color: isActive
+                  ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: isActive ? Border.all(color: primaryColor, width: 2) : null,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: Icon(
               icon,
-              color: isActive ? activeColor : Colors.grey[400],
+              color: isActive ? primaryColor : Colors.grey[400],
               size: 20,
             ),
           ),
@@ -495,7 +464,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Text(
             label,
             style: TextStyle(
-              color: isActive ? activeColor : Colors.grey[400],
+              color: isActive ? primaryColor : Colors.grey[400],
               fontSize: 12,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             ),
@@ -503,6 +472,53 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
       ),
     );
+  }
+
+  void _handleNavigation(String route) {
+    switch (route) {
+      case 'search':
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+          (route) => false,
+        );
+        break;
+      case 'analytics':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnalyticsScreen(
+              onBackToSearch: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+          ),
+        );
+        break;
+      case 'compare':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CompareScreen(
+              onBackToSearch: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+          ),
+        );
+        break;
+      case 'history':
+        // Already here
+        break;
+    }
   }
 
   Widget _buildHistoryCard(
@@ -514,20 +530,38 @@ class _HistoryScreenState extends State<HistoryScreen> {
       Color cardColor,
       Color bodyTextColor,
       ) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(12),
+          color: isDarkMode
+              ? Colors.white.withOpacity(0.05)
+              : Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDarkMode
+                ? Colors.white.withOpacity(0.1)
+                : Colors.white.withOpacity(0.5),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               child: Image.network(
                 thumbnail,
                 width: 100,
@@ -550,17 +584,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Analyzed: ${DateTime.parse(timestamp).toString().split('.')[0]}',
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 12,
-                    ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time_rounded, size: 14, color: primaryColor.withOpacity(0.7)),
+                      const SizedBox(width: 4),
+                      Text(
+                        DateTime.parse(timestamp).toString().split('.')[0],
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white60 : Colors.black54,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
+            Icon(Icons.chevron_right_rounded, color: primaryColor.withOpacity(0.5)),
           ],
         ),
       ),

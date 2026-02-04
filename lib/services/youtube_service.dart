@@ -136,4 +136,60 @@ class YouTubeService {
     }
     return count;
   }
+
+  /// Get search suggestions for a query
+  Future<List<String>> getSearchSuggestions(String query) async {
+    if (query.isEmpty) return [];
+    
+    try {
+      final googleUrl = 'https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=${Uri.encodeComponent(query)}';
+      
+      // Use a CORS proxy only for Web to avoid "Failed to fetch" errors.
+      // Native apps (Android/iOS) don't have CORS restrictions.
+      final bool isWeb = identical(0, 0.0); // Simple way to check for web if kIsWeb is not imported
+      
+      if (isWeb) {
+        final url = Uri.parse('https://api.allorigins.win/get?url=${Uri.encodeComponent(googleUrl)}');
+        final response = await _client.get(url);
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          final body = data['contents'] as String;
+          
+          final startIndex = body.indexOf('([');
+          final endIndex = body.lastIndexOf('])');
+          
+          if (startIndex != -1 && endIndex != -1) {
+            final jsonStr = body.substring(startIndex + 1, endIndex + 1);
+            final decodedData = json.decode(jsonStr);
+            final List<dynamic> suggestionsData = decodedData[1];
+            return suggestionsData.map<String>((item) => item[0].toString()).toList();
+          }
+        }
+      } else {
+        // Direct call for Native (Android/iOS)
+        final url = Uri.parse(googleUrl);
+        final response = await _client.get(url);
+
+        if (response.statusCode == 200) {
+          // The response is usually in the format: window.google.ac.h(["query",[["suggestion1",0],...]])
+          // or just the JSON array depending on headers/client.
+          final body = response.body;
+          final startIndex = body.indexOf('([');
+          final endIndex = body.lastIndexOf('])');
+          
+          if (startIndex != -1 && endIndex != -1) {
+            final jsonStr = body.substring(startIndex + 1, endIndex + 1);
+            final decodedData = json.decode(jsonStr);
+            final List<dynamic> suggestionsData = decodedData[1];
+            return suggestionsData.map<String>((item) => item[0].toString()).toList();
+          }
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching suggestions: $e');
+      return [];
+    }
+  }
 }

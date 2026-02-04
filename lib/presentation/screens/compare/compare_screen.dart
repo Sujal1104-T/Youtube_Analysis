@@ -4,6 +4,7 @@ import 'package:insight_tube/services/sentiment_service.dart';
 import '../analytics/analytics_screen.dart';
 import '../history/history_screen.dart';
 import '../home/home_screen.dart';
+import '../../../main.dart';
 
 class CompareScreen extends StatefulWidget {
   final VoidCallback? onBackToSearch;
@@ -68,6 +69,34 @@ class _CompareScreenState extends State<CompareScreen> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
+                ),
+              ),
+              child: Icon(
+                Icons.arrow_back,
+                color: primaryColor,
+                size: 20,
+              ),
+            ),
+            onPressed: () {
+              if (widget.onBackToSearch != null) {
+                widget.onBackToSearch!();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
           title: Row(
             children: [
               Container(
@@ -76,54 +105,43 @@ class _CompareScreenState extends State<CompareScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [primaryColor, const Color(0xFF00FFB9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 12),
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [primaryColor, const Color(0xFF00FFB9)],
-                ).createShader(bounds),
-                child: Text(
-                  'InsightTube',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'InsightTube',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: isDarkMode ? Colors.white : const Color(0xFF0A0E27),
+                    ),
                   ),
-                ),
+                  Text(
+                    'Comparison',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
           actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 16),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDarkMode
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.black.withOpacity(0.1),
-                ),
-              ),
-              child: Icon(
-                isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-                color: primaryColor,
-                size: 20,
-              ),
+            IconButton(
+              icon: Icon(isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+              onPressed: () {
+                final appState = MyApp.of(context);
+                appState.toggleTheme();
+              },
             ),
+            const SizedBox(width: 8),
           ],
         ),
         body: SingleChildScrollView(
@@ -131,7 +149,7 @@ class _CompareScreenState extends State<CompareScreen> {
             children: [
               // Navigation Grid
               Container(
-                margin: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isDarkMode
@@ -153,82 +171,22 @@ class _CompareScreenState extends State<CompareScreen> {
                   ],
                 ),
                 child: Row(
-                children: [
-                  Expanded(
-                    child: _buildNavItem(
-                      context,
-                      Icons.search,
-                      'Search',
-                      false,
-                          () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                              (route) => false,
-                        );
-                      },
+                  children: [
+                    Expanded(
+                      child: _buildNavItem(Icons.search, 'Search', 'search', false, isDarkMode, primaryColor),
                     ),
-                  ),
-                  Expanded(
-                    child: _buildNavItem(
-                      context,
-                      Icons.bar_chart,
-                      'Analytics',
-                      false,
-                          () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AnalyticsScreen(
-                              onBackToSearch: () {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                                      (route) => false,
-                                );
-                              },
-                            ),
-                          ),
-                        );
-                      },
+                    Expanded(
+                      child: _buildNavItem(Icons.bar_chart, 'Analytics', 'analytics', false, isDarkMode, primaryColor),
                     ),
-                  ),
-                  Expanded(
-                    child: _buildNavItem(
-                      context,
-                      Icons.compare_arrows,
-                      'Compare',
-                      true,
-                          () {}, // Current screen, no action needed
+                    Expanded(
+                      child: _buildNavItem(Icons.compare_arrows, 'Compare', 'compare', true, isDarkMode, primaryColor),
                     ),
-                  ),
-                  Expanded(
-                    child: _buildNavItem(
-                      context,
-                      Icons.history,
-                      'History',
-                      false,
-                          () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HistoryScreen(
-                              onBackToSearch: () {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                                      (route) => false,
-                                );
-                              },
-                            ),
-                          ),
-                        );
-                      },
+                    Expanded(
+                      child: _buildNavItem(Icons.history, 'History', 'history', false, isDarkMode, primaryColor),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
             // Comparison Content Section
             Padding(
@@ -258,19 +216,22 @@ class _CompareScreenState extends State<CompareScreen> {
                   if (_isLoading)
                     const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
 
-                  if (!_isLoading && _videosToCompare.length < 2)
+                  if (!_isLoading && _videosToCompare.isEmpty)
                     _buildNoVideosToCompare(bodyTextColor, cardColor),
 
-                  if (!_isLoading && _videosToCompare.length >= 2)
+                  if (!_isLoading && _videosToCompare.isNotEmpty)
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildComparisonCard(_videosToCompare[0], bodyTextColor, cardColor),
+                          _buildComparisonCard(0, bodyTextColor, cardColor),
                           const SizedBox(width: 16),
-                          _buildComparisonCard(_videosToCompare[1], bodyTextColor, cardColor),
-                          const SizedBox(width: 16), // Padding for last card
+                          if (_videosToCompare.length < 2)
+                            _buildAddVideoPlaceholder(bodyTextColor, cardColor)
+                          else
+                            _buildComparisonCard(1, bodyTextColor, cardColor),
+                          const SizedBox(width: 16),
                         ],
                       ),
                     ),
@@ -292,66 +253,57 @@ class _CompareScreenState extends State<CompareScreen> {
       padding: const EdgeInsets.all(32),
       margin: const EdgeInsets.only(top: 16),
       decoration: BoxDecoration(
-        // Use dynamic colors
         color: cardColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80,
-            height: 80,
-            decoration: const BoxDecoration(
-              color: Color(0xFF6366F1),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6366F1).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.compare_arrows,
-              color: Colors.white,
-              size: 40,
+              Icons.compare_arrows_rounded,
+              color: Color(0xFF6366F1),
+              size: 48,
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            'No Videos to Compare',
+            'Compare Two Videos',
             style: TextStyle(
               color: bodyTextColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Add videos to start comparing their\nperformance metrics',
+            'Add YouTube videos side-by-side to\nanalyze and compare their performance.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.grey[400],
-              fontSize: 14,
+              fontSize: 15,
               height: 1.5,
             ),
           ),
           const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _showAddVideoDialog,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE53935),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
+          ElevatedButton.icon(
+            onPressed: _showAddVideoDialog,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Add First Video'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE53935),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                'Add Video',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              elevation: 0,
             ),
           ),
         ],
@@ -359,70 +311,251 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
-  Widget _buildComparisonCard(Map<String, dynamic> data, Color bodyTextColor, Color cardColor) {
+  Widget _buildAddVideoPlaceholder(Color bodyTextColor, Color cardColor) {
+    return Container(
+      width: 300,
+      height: 400, // Matching comparison card height approximately
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: cardColor.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF6366F1).withOpacity(0.3),
+          width: 2,
+          style: BorderStyle.none, // Will use dotted effect if possible or just simple border
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _showAddVideoDialog,
+          borderRadius: BorderRadius.circular(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.add_circle_outline_rounded,
+                color: const Color(0xFF6366F1).withOpacity(0.7),
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Add Second Video',
+                style: TextStyle(
+                  color: bodyTextColor.withOpacity(0.8),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Paste URL to compare',
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildComparisonCard(int index, Color bodyTextColor, Color cardColor) {
+    final data = _videosToCompare[index];
     final video = data['video'];
     final stats = data['analytics']['statistics'];
     final sentiment = data['analytics']['sentiment_analysis'];
-    final deepAnalytics = data['analytics']['deep_analytics'];
-    final keywordsCount = (deepAnalytics['top_keywords'] as List<dynamic>).length.toString();
-    final sentimentScore = sentiment['score'].toString();
+    
+    // Convert counts to doubles for calculation
+    double getRaw(dynamic val) {
+       if (val is int) return val.toDouble();
+       if (val is String) {
+         String clean = val.replaceAll(RegExp(r'[^0-9.]'), '');
+         double? d = double.tryParse(clean);
+         if (d != null) {
+            if (val.contains('M')) return d * 1000000;
+            if (val.contains('K')) return d * 1000;
+            return d;
+         }
+       }
+       return 0.0;
+    }
+
+    final views = getRaw(stats['viewCount']);
+    final likes = getRaw(stats['likeCount']);
+    final comments = getRaw(sentiment['total_comments']);
+    
+    final engagementRate = views > 0 ? ((likes + comments) / views * 100) : 0.0;
+    
+    bool isWinner(String metric, dynamic value) {
+      if (_videosToCompare.length < 2) return false;
+      int otherIndex = index == 0 ? 1 : 0;
+      final otherData = _videosToCompare[otherIndex];
+      final otherStats = otherData['analytics']['statistics'];
+      final otherSentiment = otherData['analytics']['sentiment_analysis'];
+
+      if (metric == 'Views') return views > getRaw(otherStats['viewCount']);
+      if (metric == 'Likes') return likes > getRaw(otherStats['likeCount']);
+      if (metric == 'Engagement') {
+         final otherViews = getRaw(otherStats['viewCount']);
+         final otherER = otherViews > 0 ? ((getRaw(otherStats['likeCount']) + getRaw(otherSentiment['total_comments'])) / otherViews * 100) : 0.0;
+         return engagementRate > otherER;
+      }
+      if (metric == 'Positive') return (sentiment['positive_count'] as int) > (otherSentiment['positive_count'] as int);
+      
+      return false;
+    }
 
     return Container(
       width: 300,
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        // Use dynamic colors
         color: cardColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              video['thumbnail'],
-              width: double.infinity,
-              height: 150,
-              fit: BoxFit.cover,
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: Image.network(
+                  video['thumbnail'],
+                  width: double.infinity,
+                  height: 160,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _videosToCompare.removeAt(index);
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.close, color: Colors.white, size: 18),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  video['title'],
+                  style: TextStyle(
+                    color: bodyTextColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  video['channelTitle'],
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 12,
+                  ),
+                ),
+                const Divider(height: 24, thickness: 0.5),
+                
+                _buildComparisonMetric('Views', stats['viewCount'], bodyTextColor, isWinner: isWinner('Views', null)),
+                _buildComparisonMetric('Likes', stats['likeCount'], bodyTextColor, isWinner: isWinner('Likes', null)),
+                _buildComparisonMetric('Engagement', '${engagementRate.toStringAsFixed(2)}%', bodyTextColor, isWinner: isWinner('Engagement', null)),
+                
+                const SizedBox(height: 12),
+                const Text('Sentiment Breakdown', style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                _buildSentimentBar(sentiment),
+                const SizedBox(height: 8),
+                
+                _buildComparisonMetric('Positive', '${sentiment['positive_count']}', Colors.green, isWinner: isWinner('Positive', null)),
+                _buildComparisonMetric('Negative', '${sentiment['negative_count']}', Colors.red),
+                _buildComparisonMetric('Overall', sentiment['overall_sentiment'], _getSentimentColor(sentiment['overall_sentiment'])),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            video['title'],
-            style: TextStyle(
-              color: bodyTextColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 12),
-          _buildComparisonMetric('Views', stats['viewCount'], bodyTextColor),
-          _buildComparisonMetric('Likes', stats['likeCount'], bodyTextColor),
-          _buildComparisonMetric('Comments', sentiment['total_comments'].toString(), bodyTextColor),
-          _buildComparisonMetric('Keywords Found', keywordsCount, bodyTextColor),
-          _buildComparisonMetric('Sentiment Score', sentimentScore, bodyTextColor, color: _getSentimentColor(sentiment['overall_sentiment'])),
-          _buildComparisonMetric('Overall Sentiment', sentiment['overall_sentiment'], bodyTextColor, color: _getSentimentColor(sentiment['overall_sentiment'])),
         ],
       ),
     );
   }
 
-  Widget _buildComparisonMetric(String label, String value, Color bodyTextColor, {Color? color}) {
+  Widget _buildSentimentBar(Map<String, dynamic> sentiment) {
+    final total = sentiment['total_comments'] as int;
+    if (total == 0) return const SizedBox.shrink();
+
+    final pos = (sentiment['positive_count'] as int) / total;
+    final neg = (sentiment['negative_count'] as int) / total;
+    final neu = (sentiment['neutral_count'] as int) / total;
+
+    return Container(
+      height: 8,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        color: Colors.grey.withOpacity(0.1),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Row(
+          children: [
+            Expanded(flex: (pos * 100).toInt(), child: Container(color: Colors.green)),
+            Expanded(flex: (neu * 100).toInt(), child: Container(color: Colors.orange)),
+            Expanded(flex: (neg * 100).toInt(), child: Container(color: Colors.red)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildComparisonMetric(String label, String value, Color bodyTextColor, {Color? color, bool isWinner = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: TextStyle(color: Colors.grey[400]),
+            style: TextStyle(color: Colors.grey[400], fontSize: 13),
           ),
-          Text(
-            value,
-            style: TextStyle(color: color ?? bodyTextColor, fontWeight: FontWeight.w600),
+          Row(
+            children: [
+              if (isWinner)
+                const Padding(
+                  padding: EdgeInsets.only(right: 4.0),
+                  child: Icon(Icons.stars_rounded, color: Colors.amber, size: 14),
+                ),
+              Text(
+                value,
+                style: TextStyle(
+                  color: isWinner ? (color ?? const Color(0xFF00FFB9)) : (color ?? bodyTextColor),
+                  fontWeight: isWinner ? FontWeight.bold : FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -436,38 +569,40 @@ class _CompareScreenState extends State<CompareScreen> {
   }
 
   Widget _buildNavItem(
-      BuildContext context,
-      IconData icon,
-      String label,
-      bool isActive,
-      VoidCallback onTap,
-      ) {
-    Color activeColor = const Color(0xFF6366F1);
-
-    if (label == 'History') {
-      activeColor = const Color(0xFFFF9800);
-    }
-    if (label == 'Search') {
-      activeColor = const Color(0xFFE53935);
-    }
-
-    // Dynamic access to theme for background color
-    final itemBgColor = Theme.of(context).scaffoldBackgroundColor;
-
+    IconData icon,
+    String label,
+    String route,
+    bool isActive,
+    bool isDarkMode,
+    Color primaryColor,
+  ) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        _handleNavigation(route);
+      },
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: itemBgColor,
-              borderRadius: BorderRadius.circular(8),
-              border: isActive ? Border.all(color: activeColor, width: 2) : null,
+              color: isActive
+                  ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: isActive ? Border.all(color: primaryColor, width: 2) : null,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: Icon(
               icon,
-              color: isActive ? activeColor : Colors.grey[400],
+              color: isActive ? primaryColor : Colors.grey[400],
               size: 20,
             ),
           ),
@@ -475,7 +610,7 @@ class _CompareScreenState extends State<CompareScreen> {
           Text(
             label,
             style: TextStyle(
-              color: isActive ? activeColor : Colors.grey[400],
+              color: isActive ? primaryColor : Colors.grey[400],
               fontSize: 12,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             ),
@@ -483,6 +618,53 @@ class _CompareScreenState extends State<CompareScreen> {
         ],
       ),
     );
+  }
+
+  void _handleNavigation(String route) {
+    switch (route) {
+      case 'search':
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+          (route) => false,
+        );
+        break;
+      case 'analytics':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnalyticsScreen(
+              onBackToSearch: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+          ),
+        );
+        break;
+      case 'compare':
+        // Already here
+        break;
+      case 'history':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HistoryScreen(
+              onBackToSearch: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+          ),
+        );
+        break;
+    }
   }
 
   void _showAddVideoDialog() {

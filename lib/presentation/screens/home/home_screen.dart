@@ -6,6 +6,8 @@ import 'package:insight_tube/services/youtube_service.dart';
 import 'package:insight_tube/services/sentiment_service.dart';
 import '../results/results_screen.dart';
 import '../../../main.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:permission_handler/permission_handler.dart';
 
 class InsightTubeticsScreen extends StatefulWidget {
   const InsightTubeticsScreen({Key? key}) : super(key: key);
@@ -24,6 +26,11 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
   bool isKeywordsSelected = true;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  
+  // Voice Search variables
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+  String _lastWords = '';
 
   @override
   void initState() {
@@ -42,7 +49,63 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
   void dispose() {
     searchController.dispose();
     _fadeController.dispose();
+    _speech.stop();
     super.dispose();
+  }
+
+  Future<void> _toggleListening() async {
+    if (!_isListening) {
+      // Check permissions first
+      var status = await Permission.microphone.status;
+      if (status.isDenied) {
+        status = await Permission.microphone.request();
+        if (status.isDenied) {
+          _showError('Microphone permission is required for voice search.');
+          return;
+        }
+      }
+
+      bool available = await _speech.initialize(
+        onStatus: (val) {
+          if (val == 'done' || val == 'notListening') {
+            setState(() => _isListening = false);
+          }
+          print('Speech status: $val');
+        },
+        onError: (val) {
+          setState(() => _isListening = false);
+          _showError('Voice recognition error: ${val.errorMsg}');
+        },
+      );
+
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _lastWords = val.recognizedWords;
+              if (_lastWords.isNotEmpty) {
+                searchController.text = _lastWords;
+                // If the user stops talking, we could auto-search
+              }
+            });
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   Future<void> _performSearch() async {
@@ -409,8 +472,6 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                           ],
                         ),
 
-                        const SizedBox(height: 16),
-
                         // Search Input with Glow Effect
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -433,21 +494,98 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
                               ),
                             ],
                           ),
-                          child: TextField(
-                            controller: searchController,
-                            style: theme.textTheme.bodyLarge,
-                            decoration: InputDecoration(
-                              hintText: isKeywordsSelected
-                                  ? 'Enter keywords to search videos...'
-                                  : 'Enter YouTube URL to analyze...',
-                              hintStyle: theme.textTheme.bodyMedium,
-                              border: InputBorder.none,
-                              suffixIcon: Icon(
-                                Icons.mic,
-                                color: primaryColor.withOpacity(0.6),
-                                size: 22,
-                              ),
-                            ),
+                          child: RawAutocomplete<String>(
+                            optionsBuilder: (TextEditingValue textEditingValue) async {
+                              if (textEditingValue.text.isEmpty || !isKeywordsSelected) {
+                                return const Iterable<String>.empty();
+                              }
+                              return await _youtubeService.getSearchSuggestions(textEditingValue.text);
+                            },
+                            onSelected: (String selection) {
+                              searchController.text = selection;
+                              _performSearch();
+                            },
+                            fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                              // Sync our searchController with Autocomplete's controller
+                              if (controller.text != searchController.text && searchController.text.isNotEmpty && controller.text.isEmpty) {
+                                 controller.text = searchController.text;
+                              }
+                              controller.addListener(() {
+                                searchController.text = controller.text;
+                              });
+
+                              return TextField(
+                                controller: controller,
+                                focusNode: focusNode,
+                                style: theme.textTheme.bodyLarge,
+                                decoration: InputDecoration(
+                                  hintText: isKeywordsSelected
+                                      ? 'Enter keywords to search videos...'
+                                      : 'Enter YouTube URL to analyze...',
+                                  hintStyle: theme.textTheme.bodyMedium,
+                                  border: InputBorder.none,
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _isListening ? Icons.graphic_eq : Icons.mic,
+                                      color: _isListening ? Colors.redAccent : primaryColor.withOpacity(0.6),
+                                      size: 22,
+                                    ),
+                                    onPressed: _toggleListening,
+                                    tooltip: 'Voice Search',
+                                  ),
+                                ),
+                                onSubmitted: (_) => _performSearch(),
+                              );
+                            },
+                            optionsViewBuilder: (context, onSelected, options) {
+                              return Align(
+                                alignment: Alignment.topLeft,
+                                child: Material(
+                                  elevation: 8,
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: isDarkMode ? const Color(0xFF1A1F3A) : Colors.white,
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width - 64, // Adjust for padding
+                                    constraints: const BoxConstraints(maxHeight: 250),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: primaryColor.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: ListView.builder(
+                                      padding: EdgeInsets.zero,
+                                      shrinkWrap: true,
+                                      itemCount: options.length,
+                                      itemBuilder: (BuildContext context, int index) {
+                                        final String option = options.elementAt(index);
+                                        return InkWell(
+                                          onTap: () => onSelected(option),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.search, size: 16, color: primaryColor.withOpacity(0.7)),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    option,
+                                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
 

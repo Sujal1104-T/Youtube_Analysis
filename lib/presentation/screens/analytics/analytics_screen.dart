@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../compare/compare_screen.dart';
 import '../history/history_screen.dart';
 import '../home/home_screen.dart';
+import '../../../main.dart';
 import 'package:insight_tube/services/youtube_service.dart';
 import 'package:insight_tube/services/sentiment_service.dart';
 import 'dart:convert';
@@ -34,7 +35,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     } else {
       setState(() {
         _isLoading = false;
-        _error = 'No video ID provided for analysis.';
+        _error = ''; 
       });
     }
   }
@@ -91,7 +92,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         _analyticsData = analyticsData;
       });
       
-      // History saving would go here if we implemented local storage
+      // Save to local history
+      _saveToHistory(analyticsData);
       
     } catch (e) {
       setState(() {
@@ -187,6 +189,34 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
+                ),
+              ),
+              child: Icon(
+                Icons.arrow_back,
+                color: primaryColor,
+                size: 20,
+              ),
+            ),
+            onPressed: () {
+              if (widget.onBackToSearch != null) {
+                widget.onBackToSearch!();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
           title: Row(
             children: [
               Container(
@@ -195,61 +225,50 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [primaryColor, const Color(0xFF00FFB9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 12),
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [primaryColor, const Color(0xFF00FFB9)],
-                ).createShader(bounds),
-                child: Text(
-                  'InsightTube',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'InsightTube',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: isDarkMode ? Colors.white : const Color(0xFF0A0E27),
+                    ),
                   ),
-                ),
+                  Text(
+                    'AI Analytics',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
           actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 16),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDarkMode
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.black.withOpacity(0.1),
-                ),
-              ),
-              child: Icon(
-                isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-                color: primaryColor,
-                size: 20,
-              ),
+            IconButton(
+              icon: Icon(isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+              onPressed: () {
+                final appState = MyApp.of(context);
+                appState.toggleTheme();
+              },
             ),
+            const SizedBox(width: 8),
           ],
         ),
         body: Column(
           children: [
             // Navigation Grid
             Container(
-              margin: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isDarkMode
@@ -270,88 +289,65 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   ),
                 ],
               ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildNavItem(
-                    context,
-                    Icons.search,
-                    'Search',
-                    false,
-                        () {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                            (route) => false,
-                      );
-                    },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildNavItem(Icons.search, 'Search', 'search', false, isDarkMode, primaryColor),
                   ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    context,
-                    Icons.bar_chart,
-                    'Analytics',
-                    true,
-                        () {}, // Current screen, no action needed
+                  Expanded(
+                    child: _buildNavItem(Icons.bar_chart, 'Analytics', 'analytics', true, isDarkMode, primaryColor),
                   ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    context,
-                    Icons.compare_arrows,
-                    'Compare',
-                    false,
-                        () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CompareScreen(
-                            onBackToSearch: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                                    (route) => false,
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                  Expanded(
+                    child: _buildNavItem(Icons.compare_arrows, 'Compare', 'compare', false, isDarkMode, primaryColor),
                   ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    context,
-                    Icons.history,
-                    'History',
-                    false,
-                        () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HistoryScreen(
-                            onBackToSearch: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                                    (route) => false,
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                  Expanded(
+                    child: _buildNavItem(Icons.history, 'History', 'history', false, isDarkMode, primaryColor),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Analytics Data Section
-          Expanded(
-            child: _buildContent(bodyTextColor, cardColor),
-          ),
+            // Analytics Content
+            Expanded(
+              child: _isLoading
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(color: primaryColor),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Fetching analytics data...',
+                            style: TextStyle(color: bodyTextColor),
+                          ),
+                        ],
+                      ),
+                    )
+                  : _error.isNotEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _error,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Colors.redAccent, fontSize: 16),
+                                ),
+                                const SizedBox(height: 24),
+                                ElevatedButton(
+                                  onPressed: _fetchAnalyticsData,
+                                  child: const Text('Try Again'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : _buildContent(bodyTextColor, cardColor),
+            ),
           ],
         ),
       ),
@@ -389,7 +385,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     }
 
     if (_analyticsData == null) {
-      // Show the original "No Analytics Data" content
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -397,63 +392,68 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 120,
-                height: 120,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF6366F1),
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [const Color(0xFF6366F1).withOpacity(0.2), const Color(0xFF6366F1).withOpacity(0.05)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.1), width: 2),
                 ),
                 child: const Icon(
-                  Icons.bar_chart,
-                  color: Colors.white,
-                  size: 60,
+                  Icons.analytics_outlined,
+                  color: Color(0xFF6366F1),
+                  size: 70,
                 ),
               ),
               const SizedBox(height: 32),
               Text(
-                'No Analytics Data',
+                'Ready for Insights?',
                 style: TextStyle(
                   color: bodyTextColor,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                'Search for a video and click "Analyze Video" to see detailed analytics and sentiment analysis',
+                'Search for any YouTube video and select "Analyze Video" to unlock deep metrics and sentiment trends.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.grey[400],
+                  color: bodyTextColor.withOpacity(0.6),
                   fontSize: 16,
-                  height: 1.5,
+                  height: 1.6,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 48),
               SizedBox(
-                width: double.infinity,
+                width: 220,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
-                          (route) => false,
-                    );
-                  },
+                  onPressed: () => _handleNavigation('search'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE53935),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    backgroundColor: const Color(0xFF6366F1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    elevation: 0,
+                    elevation: 10,
+                    shadowColor: const Color(0xFF6366F1).withOpacity(0.4),
                   ),
-                  child: const Text(
-                    'Go to Search',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_rounded, size: 20),
+                      SizedBox(width: 12),
+                      Text(
+                        'Start Searching',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -617,29 +617,40 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   }
 
   Widget _buildNavItem(
-      BuildContext context,
-      IconData icon,
-      String label,
-      bool isActive,
-      VoidCallback onTap,
-      ) {
-    // Dynamic access to theme for background color
-    final itemBgColor = Theme.of(context).scaffoldBackgroundColor;
-
+    IconData icon,
+    String label,
+    String route,
+    bool isActive,
+    bool isDarkMode,
+    Color primaryColor,
+  ) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        _handleNavigation(route);
+      },
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: itemBgColor,
-              borderRadius: BorderRadius.circular(8),
-              border: isActive ? Border.all(color: const Color(0xFF6366F1), width: 2) : null,
+              color: isActive
+                  ? (isDarkMode ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.1))
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: isActive ? Border.all(color: primaryColor, width: 2) : null,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: Icon(
               icon,
-              color: isActive ? const Color(0xFF6366F1) : Colors.grey[400],
+              color: isActive ? primaryColor : Colors.grey[400],
               size: 20,
             ),
           ),
@@ -647,7 +658,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           Text(
             label,
             style: TextStyle(
-              color: isActive ? const Color(0xFF6366F1) : Colors.grey[400],
+              color: isActive ? primaryColor : Colors.grey[400],
               fontSize: 12,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             ),
@@ -655,6 +666,53 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ],
       ),
     );
+  }
+
+  void _handleNavigation(String route) {
+    switch (route) {
+      case 'search':
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+          (route) => false,
+        );
+        break;
+      case 'analytics':
+        // Already here
+        break;
+      case 'compare':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CompareScreen(
+              onBackToSearch: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+          ),
+        );
+        break;
+      case 'history':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HistoryScreen(
+              onBackToSearch: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const InsightTubeticsScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+          ),
+        );
+        break;
+    }
   }
 
   Widget _buildMetricCard(IconData icon, String label, String value, Color bodyTextColor, Color cardColor) {
