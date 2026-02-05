@@ -704,6 +704,7 @@ class _InsightTubeticsScreenState extends State<InsightTubeticsScreen> with Sing
 
                       // Feature Tags with Gradient Borders
                       Wrap(
+                        alignment: WrapAlignment.center,
                         spacing: 12,
                         runSpacing: 12,
                         children: [

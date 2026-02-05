@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'presentation/screens/home/home_screen.dart';
+import 'presentation/screens/splash/splash_screen.dart';
 // Removed: import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 // Removed: import 'dart:async';
 
@@ -49,7 +49,7 @@ class MyAppState extends State<MyApp> {
       title: 'InsightTube',
       theme: _isDarkMode ? _darkTheme : _lightTheme,
       // Removed: Passing initialUrl
-      home: const InsightTubeticsScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
